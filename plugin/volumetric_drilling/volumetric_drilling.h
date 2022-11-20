@@ -48,6 +48,7 @@
 #include "wave_generator.h"
 #include "gaze_marker_controller.h"
 #include "drill_manager.h"
+#include "edt_utils_spine.h"
 
 using namespace std;
 using namespace ambf;
@@ -136,6 +137,26 @@ private:
     GazeMarkerController m_gazeMarkerController;
 
     CameraPanelManager m_panelManager;
+
+    //SDF related properties
+    cLabel* m_distanceLabel;
+    cAudioSource* m_beepAudioSource = nullptr; 
+    cAudioBuffer* m_beepAudioBuffer = nullptr; 
+    cAudioDevice* m_beepAudioDevice = nullptr; 
+    // EDT grids
+    EdtList edt_list;
+    EdtContainer bone_edt_cont;
+
+    // EDT resolution
+    int edtres;
+
+    int index_x;
+    int index_y;
+    int index_z;
+    vector<double> force_direction{0, 0, 0};
+    cVector3d force_edt;
+    bool m_flag_sdf = true;
+    bool footpedal_pressed = false;
 };
 
 

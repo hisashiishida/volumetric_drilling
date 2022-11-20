@@ -71,7 +71,11 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
             ("dm", p_opt::value<string>()->default_value("dark_metal_brushed.jpg"), "Drill's Matcap Filename (Should be placed in ./resources/matcap/ folder)")
             ("fp", p_opt::value<string>()->default_value("/dev/input/js0"), "Footpedal joystick input file description E.g. /dev/input/js0)")
             ("mute", p_opt::value<bool>()->default_value(false), "Mute")
-            ("gcdr", p_opt::value<double>()->default_value(30.0), "Gaze Calibration Marker Motion Duration");
+            ("gcdr", p_opt::value<double>()->default_value(30.0), "Gaze Calibration Marker Motion Duration")
+            ("edt", p_opt::value<string>()->default_value("/edt_grids_256_spine1/"), "EDT root directory")
+            ("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")
+            ("sdf", p_opt::value<string>()->default_value("/SpinalCord_256"), "sdf_texture sturcturename and resolution");
+
 
     p_opt::variables_map var_map;
     p_opt::store(p_opt::command_line_parser(argc, argv).options(cmd_opts).allow_unregistered().run(), var_map);
@@ -87,6 +91,14 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
 
     string volume_matcap = var_map["vm"].as<string>();
     string footpedal_fd = var_map["fp"].as<string>();
+
+    //Load edt/sdf related variables
+    string edt_root = var_map["edt"].as<string>();
+    cout << "AAAAA " << endl;
+
+    string sdf_path = var_map["sdf"].as<string>();
+
+    edt_root = edt_root + "/";
 
     m_zeroColor = cColorb(0x00, 0x00, 0x00, 0x00);
 
@@ -177,6 +189,105 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
         cerr << "FAILED TO LOAD VOLUME'S MATCAP TEXTURE" << endl;
     }
 
+    //Define SDF related textures
+    cTexture3dPtr sdfTex = cTexture3d::create();
+    cMultiImagePtr sdfImages = cMultiImage::create();
+
+    cTexture3dPtr sdfTex1 = cTexture3d::create();
+    cMultiImagePtr sdfImages1 = cMultiImage::create();
+
+    cTexture3dPtr sdfTex2 = cTexture3d::create();
+    cMultiImagePtr sdfImages2 = cMultiImage::create();
+
+    string sdfPath = current_filepath + "/../../" + edt_root + sdf_path + "/edtplane_";
+    // string sdfPath = cur_path + "/edt_grids_256_spine1/SpinalCord_256/edtplane_";
+
+    string sdfPath1 = current_filepath + "/../../edt_grids_256_spine3/Bone1_256/edtplane_";
+    string sdfPath2 = current_filepath + "/../../edt_grids_256_spine3/Bone2_256/edtplane_";
+    
+    
+    cerr << "SDF path: " << sdfPath << endl;
+    cerr << "SDF path1: " << sdfPath1 << endl;
+    cerr << "SDF path2: " << sdfPath1 << endl;
+
+    int num_sdfimages = sdfImages->loadFromFiles(sdfPath, "png", 512);
+    int num_sdfimages1 = sdfImages1->loadFromFiles(sdfPath1, "png", 512);
+    int num_sdfimages2 = sdfImages2->loadFromFiles(sdfPath2, "png", 512);
+
+    cout << "# of sdfimages" << num_sdfimages << endl;
+    cout << "# of sdfimages" << num_sdfimages1 << endl;
+    cout << "# of sdfimages" << num_sdfimages2 << endl;
+    if(num_sdfimages > 0){
+        sdfTex->setImage(sdfImages);
+        sdfTex1->setImage(sdfImages1);
+        sdfTex2->setImage(sdfImages2);
+
+        m_volumeObject->getInternalVolume()->m_metallicTexture = sdfTex;
+        m_volumeObject->getInternalVolume()->m_metallicTexture->setTextureUnit(GL_TEXTURE3);
+
+        m_volumeObject->getInternalVolume()->m_roughnessTexture = sdfTex1;
+        m_volumeObject->getInternalVolume()->m_roughnessTexture->setTextureUnit(GL_TEXTURE4);
+
+        m_volumeObject->getInternalVolume()->m_aoTexture = sdfTex2;
+        m_volumeObject->getInternalVolume()->m_aoTexture->setTextureUnit(GL_TEXTURE5);
+
+        cerr << "FOUND SDF TEXTURE" << endl;
+
+    }
+    else{
+        cerr << "FAILED TO FOUND SDF TEXTURE" << endl;
+    }
+
+    //*******************
+    // EDT Loading
+    //*******************
+    // edt_root = current_filepath + "/../../" + edt_root;
+
+    //TODO: Change this hardcoded root
+    edt_root = "/home/bigss/Laminectomy_SDF_based_assistance/edt_grids_256_spine1/";
+    cout << "EDT path: " << edt_root<< endl;
+    this->edt_list.print_info();
+    this->edt_list.load_all_grids(edt_root);
+
+    // EdtContainer(string p, string name, const vector<int> &rgb, const float force_thres=1.0, const float audio_thres=1.0)
+
+    //TODO: Change this hardcoded root
+    EdtContainer cont("Bone1.edt", "Bone1", vector<int>{255, 255, 255}, 1.0, 1.0);
+    this->bone_edt_cont = cont;
+    //TODO: Change this hardcoded root
+    this->bone_edt_cont.load_grid("/home/bigss/Laminectomy_SDF_based_assistance/edt_grids_256_spine3/");
+
+    // Sample access
+    unsigned int res[3];
+    this->edt_list.list[0].get_resolution(res);
+    printf("%s: (%d %d %d)\n", this->edt_list.list[0].name.c_str(),
+           this->edt_list.list[0].rgb[0], this->edt_list.list[0].rgb[1], this->edt_list.list[0].rgb[2]);
+    printf("resolution: %d %d %d\n", res[0], res[1], res[2]);
+
+
+
+    //*******************
+    // BeeP Audio Loading
+    //*******************
+
+    m_beepAudioBuffer = new cAudioBuffer();
+    string beepAudioFilepath = "../../resources/sounds/drill.wav";
+    if (m_beepAudioBuffer->loadFromFile(beepAudioFilepath))
+    {
+        cout << " Beep sound Loaded" << endl;
+        m_beepAudioSource = new cAudioSource();
+        m_beepAudioSource->setAudioBuffer(m_beepAudioBuffer);
+        m_beepAudioSource->setLoop(true);
+        m_beepAudioSource->setGain(2.0);
+    }
+    else
+    {
+        delete m_beepAudioSource;
+        delete m_beepAudioBuffer;
+        m_beepAudioSource = nullptr;
+        m_beepAudioBuffer = nullptr;
+        cerr << "FAILED TO LOAD BEEP AUDIO FROM " << beepAudioFilepath << endl;
+    }
 
 
     cBackground* background = new cBackground();
@@ -213,6 +324,12 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
     }
     m_volumeObject->getShaderProgram()->setUniformi("uMatcapMap", C_TU_AO);
     m_volumeObject->getShaderProgram()->setUniformi("shadowMap", C_TU_SHADOWMAP);
+
+
+    //Added for SDF based textures
+    m_volumeObject->getShaderProgram()->setUniformi("sdfVolume", C_TU_METALLIC);
+    m_volumeObject->getShaderProgram()->setUniformi("sdfVolume1", C_TU_ROUGHNESS);
+    m_volumeObject->getShaderProgram()->setUniformi("sdfVolume2", C_TU_AO);
 
     static double last_time = 0.0;
 
@@ -276,6 +393,80 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     {
         m_panelManager.setVisible(m_warningLabel, false);
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    // EDT calculation
+    ////////////////////////////////////////////////////////////////////////
+    cTransform world_T_voxel = m_voxelObj->getLocalTransform();
+    world_T_voxel.invert();
+    cTransform voxel_T_tool = world_T_voxel * m_drillManager.m_T_d;
+
+    if (abs(voxel_T_tool.getLocalPos().x()) < 0.5 && abs(voxel_T_tool.getLocalPos().y()) < 0.5 && abs(voxel_T_tool.getLocalPos().z()) < 0.5)
+    {
+        // cout << "EDT working ..." << endl;
+        unsigned int res[3];
+        edt_list.list[0].get_resolution(res);
+        index_x = round((voxel_T_tool.getLocalPos().x() + 0.5) * res[0]);
+        index_y = -round((voxel_T_tool.getLocalPos().y() - 0.5) * res[1]);
+        index_z = round((voxel_T_tool.getLocalPos().z() + 0.5) * res[2]);
+        // cout << index_x << "," << index_y << "," << index_z << endl;
+
+        std::string min_name = "XXX";
+        double min_distance = 1000;
+        int min_index;
+        unsigned int min_color[3];
+
+        for (int i = 0; i < edt_list.size; i++)
+        {
+            edt_list.list[i].m_dist_object = (*(edt_list.list[i].edt_grid))(index_x, index_y, index_z);
+            if (min_distance > edt_list.list[i].m_dist_object)
+            {
+
+                min_distance = edt_list.list[i].m_dist_object;
+                min_name = edt_list.list[i].name;
+                min_index = i;
+                min_color[0] = edt_list.list[i].rgb[0];
+                min_color[1] = edt_list.list[i].rgb[1];
+                min_color[2] = edt_list.list[i].rgb[2];
+            }
+        }
+        min_distance = min_distance / 4 - m_drillManager.m_activeDrill->m_size / 0.02014;
+        m_panelManager.setText(m_distanceLabel, min_name + ": " + cStr(min_distance) + " mm");
+        // m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
+
+       
+        //*************************
+        // Audio Playing
+        //*************************
+
+        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) < -1.0)
+        {
+            m_drillManager.setAudioPitch(2.0);
+        }
+        else
+        {
+            m_drillManager.setAudioPitch(1.0);
+        }
+        // if (m_beepAudioSource)
+        // {
+
+        //     if (min_distance < edt_list.list[min_index].audio_thres && m_flag_sdf)
+        //     {
+        //         m_beepAudioSource->play();
+        //     }
+        //     else
+        //     {
+        //         m_beepAudioSource->stop();
+        //     }
+        
+        // }
+    }
+
+
+
+
+
+
     // compute interaction forces
     for(int i = 0 ; i < m_drillManager.m_toolCursorList.size() ; i++){
         m_drillManager.m_toolCursorList[i]->computeInteractionForces();
@@ -460,6 +651,17 @@ void afVolmetricDrillingPlugin::initializeLabels()
     m_volumeSmoothingLabel->setText("[ALT+S] Volume Smoothing: DISABLED");
 
     m_panelManager.addPanel(m_volumeSmoothingLabel, 20, 10, PanelReferenceOrigin::LOWER_LEFT, PanelReferenceType::PIXEL);
+
+    //Add text for monitoring the distance from SDF
+    m_distanceLabel = new cLabel(font);
+    m_distanceLabel->m_fontColor.setBlack();
+    m_distanceLabel->setFontScale(1.0);
+    m_distanceLabel->setColor(cColorf(0.6, 0., 0., 1.0));
+
+    m_panelManager.addPanel(m_distanceLabel, 0.3, 0.6, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
+    
+
+
 }
 
 
@@ -785,12 +987,21 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         }
 
         // toggles the visibility of drill mesh in the scene
-        else if (a_key == GLFW_KEY_B){
+        else if (a_key == GLFW_KEY_K){
             m_drillManager.m_show = !m_drillManager.m_show;
             m_drillManager.m_activeDrill->m_rigidBody->m_visualMesh->setShowEnabled(m_drillManager.m_show);
             m_drillManager.m_burrMesh->setShowEnabled(m_drillManager.m_show);
 
         }
+
+        else if (a_key == GLFW_KEY_B){
+            if (m_footpedal.isAvailable()){
+                m_drillManager.m_isOn = !footpedal_pressed;
+                footpedal_pressed = !footpedal_pressed;
+            }
+
+        }
+
 
         // toggles size of drill burr/tip tool cursor
         else if (a_key == GLFW_KEY_C){

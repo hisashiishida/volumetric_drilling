@@ -52,6 +52,9 @@ include_directories(${AMBF_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
+# EDT reader
+include_directories(EdtReader)
+
 link_directories(${AMBF_LIBRARY_DIRS})
 
 add_definitions(${AMBF_DEFINITIONS})
@@ -79,6 +82,10 @@ add_library(volumetric_drilling SHARED
     ${vol_plugin_prefix}/camera_panel_manager.h
     ${vol_plugin_prefix}/camera_panel_manager.cpp
     ${vol_plugin_prefix}/gaze_marker_controller.h
+
+    ${vol_plugin_prefix}/EdtReader/EdtReader.cpp
+    ${vol_plugin_prefix}/EdtReader/EdtReader.h
+
   ${vol_plugin_prefix}/gaze_marker_controller.cpp)
 add_dependencies(volumetric_drilling ${catkin_EXPORTED_TARGETS})
 target_link_libraries (volumetric_drilling ${Boost_LIBRARIES} ${AMBF_LIBRARIES} ${catkin_LIBRARIES})
