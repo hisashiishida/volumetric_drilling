@@ -72,9 +72,10 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
             ("fp", p_opt::value<string>()->default_value("/dev/input/js0"), "Footpedal joystick input file description E.g. /dev/input/js0)")
             ("mute", p_opt::value<bool>()->default_value(false), "Mute")
             ("gcdr", p_opt::value<double>()->default_value(30.0), "Gaze Calibration Marker Motion Duration")
-            ("edt", p_opt::value<string>()->default_value("/edt_grids_256_spine1/"), "EDT root directory")
+            // ("edt", p_opt::value<string>()->default_value("/edt_grids_256_spine1/"), "EDT root directory")
+            ("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256/"), "EDT root directory")
             ("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")
-            ("sdf", p_opt::value<string>()->default_value("/SpinalCord_256"), "sdf_texture sturcturename and resolution");
+            ("sdf", p_opt::value<string>()->default_value("/Vertebral_foramen_256"), "sdf_texture sturcturename and resolution");
 
 
     p_opt::variables_map var_map;
@@ -199,24 +200,31 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     cTexture3dPtr sdfTex2 = cTexture3d::create();
     cMultiImagePtr sdfImages2 = cMultiImage::create();
 
+    cMultiImagePtr sdfImages3 = cMultiImage::create();
+
     string sdfPath = current_filepath + "/../../" + edt_root + sdf_path + "/edtplane_";
     // string sdfPath = cur_path + "/edt_grids_256_spine1/SpinalCord_256/edtplane_";
 
-    string sdfPath1 = current_filepath + "/../../edt_grids_256_spine3/Bone1_256/edtplane_";
-    string sdfPath2 = current_filepath + "/../../edt_grids_256_spine3/Bone2_256/edtplane_";
+    string sdfPath1 = current_filepath + "/../../" + edt_root + "L1_minus_drilling_256" + "/edtplane_";
+    string sdfPath2 = current_filepath + "/../../" + edt_root + "L2_minus_drilling_256" + "/edtplane_";
+    string sdfPath3 = current_filepath + "/../../" + edt_root + "L3_minus_drilling_256" + "/edtplane_";
     
     
     cerr << "SDF path: " << sdfPath << endl;
     cerr << "SDF path1: " << sdfPath1 << endl;
-    cerr << "SDF path2: " << sdfPath1 << endl;
+    cerr << "SDF path2: " << sdfPath2 << endl;
+    cerr << "SDF path3: " << sdfPath3 << endl;
 
     int num_sdfimages = sdfImages->loadFromFiles(sdfPath, "png", 512);
     int num_sdfimages1 = sdfImages1->loadFromFiles(sdfPath1, "png", 512);
     int num_sdfimages2 = sdfImages2->loadFromFiles(sdfPath2, "png", 512);
+    int num_sdfimages3 = sdfImages3->loadFromFiles(sdfPath3, "png", 512);
 
-    cout << "# of sdfimages" << num_sdfimages << endl;
-    cout << "# of sdfimages" << num_sdfimages1 << endl;
-    cout << "# of sdfimages" << num_sdfimages2 << endl;
+    cout << "# of sdfimages in SDF path: " << num_sdfimages << endl;
+    cout << "# of sdfimages in SDF path1: " << num_sdfimages1 << endl;
+    cout << "# of sdfimages in SDF path2: " << num_sdfimages2 << endl;
+    cout << "# of sdfimages in SDF path3: " << num_sdfimages3 << endl;
+    
     if(num_sdfimages > 0){
         sdfTex->setImage(sdfImages);
         sdfTex1->setImage(sdfImages1);
@@ -380,7 +388,7 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
             //Publisher for voxels removed
             if(m_storedColor != m_boneColor)
             {
-                m_panelManager.setVisible(m_warningLabel, true);
+                m_panelManager.setVisible(m_warningLabel, false);
             }
         }
 
@@ -439,14 +447,17 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         // Audio Playing
         //*************************
 
-        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) < -1.0)
-        {
-            m_drillManager.setAudioPitch(2.0);
-        }
-        else
-        {
-            m_drillManager.setAudioPitch(1.0);
-        }
+        // if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) < -1.0)
+        // {
+        //     m_drillManager.setAudioPitch(2.0);
+        // }
+        // else
+        // {
+        //     m_drillManager.setAudioPitch(1.0);
+        // }
+
+
+
         // if (m_beepAudioSource)
         // {
 

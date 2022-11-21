@@ -20,4 +20,5 @@ multibody configs:
   - "ADF/single_stereo_camera.yaml" #6
   - "ADF/gaze_marker.yaml" #7
 
-  - "ADF/spine_256_seg5_0.yaml" #8
+
+  - "ADF/spine_256_P0.yaml" #8
