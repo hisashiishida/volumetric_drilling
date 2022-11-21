@@ -112,6 +112,8 @@ class NrrdConverter:
         y_step = self.y_dim_ratio
         x_step = self.x_dim_ratio
 
+        # Add the follwing if there is only one layer
+        data = np.expand_dims(data, axis=0)
         self.nrrd_data = data[:, ::x_step, ::y_step, ::z_step]
 
     def initialize_image_matrix(self):
