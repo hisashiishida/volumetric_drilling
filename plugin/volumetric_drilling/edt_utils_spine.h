@@ -39,6 +39,7 @@ public:
     {
         string complete_path = edt_root+this->path;
 
+        cout << complete_path << endl;
         float *values_buffer;
         unsigned int res[3];
         edt_reader(complete_path, &values_buffer, res);
@@ -70,10 +71,15 @@ public:
     }
 };
 
-std::string edt_paths[number_of_edt] = {"SpinalCord.edt"};
+// std::string edt_paths[number_of_edt] = {"SpinalCord.edt"};
+//                                         // "./edt_grids/Bone.edt"};
+
+// std::string edt_names[number_of_edt] = {"SpinalCord"};
+//                                         // "Bone"};
+std::string edt_paths[number_of_edt] = {"Vertebral_foramen.edt"};
                                         // "./edt_grids/Bone.edt"};
 
-std::string edt_names[number_of_edt] = {"SpinalCord"};
+std::string edt_names[number_of_edt] = {"Vertebral_foramen"};
                                         // "Bone"};
 
 
@@ -88,10 +94,9 @@ public:
 
     EdtList()
     {
-        color_map["SpinalCord"] = vector<int>{84, 188, 255};
+        color_map["Vertebral_foramen"] = vector<int>{84, 188, 255};
         // color_map["Bone"] = vector<int>{255, 249, 219};//16
-
-        thres_map["SpinalCord"] = vector<double>{1.0,1.0};
+      thres_map["Vertebral_foramen"] = vector<double>{1.0,1.0};
        
 
         

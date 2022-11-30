@@ -72,7 +72,7 @@ In this readme we assume that seg.nrrd files is in `~/Downloads/spine_segmentati
 
 ```bash
 cd <volumetric_plugin_path>/scripts
-python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segmentations/SegmentationP0.seg.nrrd -p ../resources/volumes/spine_P0_256/
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segmentations/SegmentationP0.seg.nrrd -p ../resources/volumes/spine_P0_256/plane0
 ```
 
 ### 2.2 Create SDF from the sliced image

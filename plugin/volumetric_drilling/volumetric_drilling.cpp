@@ -73,9 +73,10 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
             ("mute", p_opt::value<bool>()->default_value(false), "Mute")
             ("gcdr", p_opt::value<double>()->default_value(30.0), "Gaze Calibration Marker Motion Duration")
             // ("edt", p_opt::value<string>()->default_value("/edt_grids_256_spine1/"), "EDT root directory")
-            ("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256/"), "EDT root directory")
+            ("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256"), "EDT root directory")
             ("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")
-            ("sdf", p_opt::value<string>()->default_value("/Vertebral_foramen_256"), "sdf_texture sturcturename and resolution");
+            ("bone", p_opt::value<string>()->default_value("L1_minus_drilling"), "Bone edt (ex. L1_minus_drilling)")
+            ("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcturename and resolution");
 
 
     p_opt::variables_map var_map;
@@ -95,9 +96,9 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
 
     //Load edt/sdf related variables
     string edt_root = var_map["edt"].as<string>();
-    cout << "AAAAA " << endl;
 
     string sdf_path = var_map["sdf"].as<string>();
+    string bone_edt_name = var_map["bone"].as<string>();
 
     edt_root = edt_root + "/";
 
@@ -205,7 +206,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     string sdfPath = current_filepath + "/../../" + edt_root + sdf_path + "/edtplane_";
     // string sdfPath = cur_path + "/edt_grids_256_spine1/SpinalCord_256/edtplane_";
 
-    string sdfPath1 = current_filepath + "/../../" + edt_root + "L1_minus_drilling_256" + "/edtplane_";
+    string sdfPath1 = current_filepath + "/../../" + edt_root + bone_edt_name + "_256" + "/edtplane_";
     string sdfPath2 = current_filepath + "/../../" + edt_root + "L2_minus_drilling_256" + "/edtplane_";
     string sdfPath3 = current_filepath + "/../../" + edt_root + "L3_minus_drilling_256" + "/edtplane_";
     
@@ -249,10 +250,10 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     //*******************
     // EDT Loading
     //*******************
-    // edt_root = current_filepath + "/../../" + edt_root;
+    edt_root = current_filepath + "/../../" + edt_root;
 
     //TODO: Change this hardcoded root
-    edt_root = "/home/bigss/Laminectomy_SDF_based_assistance/edt_grids_256_spine1/";
+    // edt_root = "/home/bigss/Laminectomy_SDF_based_assistance/edt_grids_256_spine1/";
     cout << "EDT path: " << edt_root<< endl;
     this->edt_list.print_info();
     this->edt_list.load_all_grids(edt_root);
@@ -260,10 +261,15 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     // EdtContainer(string p, string name, const vector<int> &rgb, const float force_thres=1.0, const float audio_thres=1.0)
 
     //TODO: Change this hardcoded root
-    EdtContainer cont("Bone1.edt", "Bone1", vector<int>{255, 255, 255}, 1.0, 1.0);
+    EdtContainer cont(bone_edt_name + ".edt", bone_edt_name, vector<int>{255, 255, 255}, 1.0, 1.0);
+    // EdtContainer cont( "L1_minus_drilling.edt", "L1_minus_drilling", vector<int>{255, 255, 255}, 1.0, 1.0);
+
     this->bone_edt_cont = cont;
     //TODO: Change this hardcoded root
-    this->bone_edt_cont.load_grid("/home/bigss/Laminectomy_SDF_based_assistance/edt_grids_256_spine3/");
+    cout << edt_root << endl;
+
+    this->bone_edt_cont.load_grid(edt_root);
+    // this->bone_edt_cont.load_grid("/home/hishida3/volumetric_drilling/resources/edt_grids/spine_P0_256/");
 
     // Sample access
     unsigned int res[3];
