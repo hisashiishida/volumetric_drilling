@@ -76,7 +76,7 @@ add_library(volumetric_drilling SHARED
     ${vol_plugin_prefix}/footpedal.cpp
     ${vol_plugin_prefix}/footpedal.h
     ${vol_plugin_prefix}/wave_generator.cpp
-    ${vol_plugin_prefix}/wave_generator.h
+    ${vol_plugin_prefix}/wave_generator.h     
     ${vol_plugin_prefix}/drill_manager.cpp
     ${vol_plugin_prefix}/drill_manager.h
     ${vol_plugin_prefix}/camera_panel_manager.h
@@ -94,3 +94,5 @@ set_property(TARGET volumetric_drilling PROPERTY POSITION_INDEPENDENT_CODE TRUE)
 add_library(camera_hmd plugin/camera_hmd/hmd.cpp plugin/camera_hmd/hmd.h)
 target_link_libraries(camera_hmd ${AMBF_LIBRARIES})
 set_property(TARGET camera_hmd PROPERTY POSITION_INDEPENDENT_CODE TRUE)
+
+add_executable(EDTImageGeneration scripts/EDTImageGeneration/EdtImageGeneration.cpp scripts/EDTImageGeneration/EdtReader.cpp scripts/EDTImageGeneration/lodepng.cpp)

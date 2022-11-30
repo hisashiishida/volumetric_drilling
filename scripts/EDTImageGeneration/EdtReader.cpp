@@ -22,6 +22,7 @@ void edt_reader(string file_name, float **values_buffer, unsigned int *res)
     char error_msg[100];
 
     FILE *fp = fopen(file_name.c_str(), "rb");
+    cout << "Opening: " << file_name.c_str() << endl;
     if (!fp)
         throw std::runtime_error("Error loading the file");
     else
