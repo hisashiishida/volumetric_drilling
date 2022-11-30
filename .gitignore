@@ -6,6 +6,7 @@ build/
 .vscode
 
 *.pyc
+pydrilling.egg-info
 
 # EDT files
 *.edt
@@ -22,3 +23,4 @@ hdf5_files
 *.autosave
 
 *.blend1
+
