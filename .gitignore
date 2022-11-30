@@ -11,6 +11,7 @@ pydrilling.egg-info
 # EDT files
 *.edt
 *.ply
+edtplane*
 
 
 *resources/volumes/

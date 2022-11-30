@@ -31,12 +31,7 @@ int main()
     scanf ("%4s",&resolution);
     
     char input_file_name[100];
-    sprintf(input_file_name, "/home/hishida3/volumetric_drilling/resources/edt_grids/%s_%s/%s.edt", &CT_scan, &resolution, &structure, &resolution);
-
-    // sprintf(input_file_name, "/home/bigss/volumetric_drilling/resources/edt_grids/%s_%s/%s.edt", &CT_scan, &resolution, &structure);
-    // string structure = "../../edt_grids_512_RT147/Bone";
-    // string file_name = "../../edt_grids_512_RT147/Bone.edt";
-    // sprintf(input_file_name, "/home/bigss/volumetric_drilling/resources/edt_grids/spine_P1_256/L1_minus_drilling.edt");
+    sprintf(input_file_name, "../resources/edt_grids/%s_%s/%s.edt", &CT_scan, &resolution, &structure, &resolution);
     
     char error_msg[100];
     sprintf(error_msg, "Reading %s", &input_file_name);
@@ -46,10 +41,8 @@ int main()
     unsigned int res[3];
 
     Array3d<float> *edt_grid;
-    cout << "Before edt_readers" << input_file_name << endl;
     edt_reader(input_file_name, &values_buffer, res);
-    cout << "After edt_readers" << endl;
-    
+
     edt_grid = new Array3d<float>(values_buffer, res);
 
     cout << "Resolution:" << res[0] << ","  << res[1] << "," << res[2] << endl;
@@ -59,7 +52,7 @@ int main()
     image.resize(width * height * 4);
     int z=0;
     double max_edt = 0;
-    int scale = res[0];
+    int scale = res[2];
     for (z = 0; z < res[2]; z++){
         for(unsigned y = 0; y < height; y++){
             for(unsigned x = 0; x < width; x++) {
@@ -74,15 +67,8 @@ int main()
             }
         }
 
-   
-        string index = to_string(z);
-        // string resolution = to_string(res[1]);
+        // Output the edt image files
         char out_filename[200];
-        // sprintf(out_filename, "./../../edt_grids_512_RT147/%s_%s/edtplane_%s.png",&structure, &resolution, &index[0]);
-    
-
-        // sprintf(out_filename, "./../../edt_grids_%s_%s/%s_%s/edtplane_%s.png", &CT_scan,&resolution,&structure, &resolution, &index[0]);
-        
         sprintf(out_filename, "./../resources/edt_grids/%s_%s/%s_%s/edtplane_%s.png", &CT_scan, &resolution, &structure, &resolution, &index[0]);
         encodeTwoSteps(out_filename, image, width, height);
     }

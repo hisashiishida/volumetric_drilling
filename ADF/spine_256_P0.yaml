@@ -25,3 +25,4 @@ VOLUME mastoidectomy_volume:
     path: ./shaders/volume/
     vertex: shader.vs
     fragment: shader_color.fs
+    # fragment: shader.fs
