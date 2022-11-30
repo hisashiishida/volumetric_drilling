@@ -39,7 +39,6 @@ public:
     {
         string complete_path = edt_root+this->path;
 
-        cout << complete_path << endl;
         float *values_buffer;
         unsigned int res[3];
         edt_reader(complete_path, &values_buffer, res);
