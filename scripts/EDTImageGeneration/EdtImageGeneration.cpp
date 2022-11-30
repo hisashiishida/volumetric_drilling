@@ -67,7 +67,8 @@ int main()
             }
         }
 
-        // Output the edt image files
+        // Create imgaes in the output file
+        string index = to_string(z);
         char out_filename[200];
         sprintf(out_filename, "./../resources/edt_grids/%s_%s/%s_%s/edtplane_%s.png", &CT_scan, &resolution, &structure, &resolution, &index[0]);
         encodeTwoSteps(out_filename, image, width, height);

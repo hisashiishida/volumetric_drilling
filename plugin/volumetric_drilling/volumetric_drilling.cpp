@@ -76,7 +76,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
             ("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256"), "EDT root directory")
             ("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")
             ("bone", p_opt::value<string>()->default_value("L1_minus_drilling"), "Bone edt (ex. L1_minus_drilling)")
-            ("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcturename and resolution");
+            ("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcture name and resolution");
 
 
     p_opt::variables_map var_map;
@@ -96,16 +96,14 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
 
     //Load edt/sdf related variables
     string edt_root = var_map["edt"].as<string>();
-
     string sdf_path = var_map["sdf"].as<string>();
     string bone_edt_name = var_map["bone"].as<string>();
-
     edt_root = edt_root + "/";
 
+
+
     m_zeroColor = cColorb(0x00, 0x00, 0x00, 0x00);
-
     m_boneColor = cColorb(255, 249, 219, 255);
-
     m_storedColor = cColorb(0x00, 0x00, 0x00, 0x00);
 
     m_worldPtr = a_afWorld;
@@ -198,38 +196,37 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     cTexture3dPtr sdfTex1 = cTexture3d::create();
     cMultiImagePtr sdfImages1 = cMultiImage::create();
 
-    cTexture3dPtr sdfTex2 = cTexture3d::create();
-    cMultiImagePtr sdfImages2 = cMultiImage::create();
-
-    cMultiImagePtr sdfImages3 = cMultiImage::create();
+    // cTexture3dPtr sdfTex2 = cTexture3d::create();
+    // cMultiImagePtr sdfImages2 = cMultiImage::create();
+    // cMultiImagePtr sdfImages3 = cMultiImage::create();
 
     string sdfPath = current_filepath + "/../../" + edt_root + sdf_path + "/edtplane_";
     // string sdfPath = cur_path + "/edt_grids_256_spine1/SpinalCord_256/edtplane_";
 
     string sdfPath1 = current_filepath + "/../../" + edt_root + bone_edt_name + "_256" + "/edtplane_";
-    string sdfPath2 = current_filepath + "/../../" + edt_root + "L2_minus_drilling_256" + "/edtplane_";
-    string sdfPath3 = current_filepath + "/../../" + edt_root + "L3_minus_drilling_256" + "/edtplane_";
+    // string sdfPath2 = current_filepath + "/../../" + edt_root + "L2_minus_drilling_256" + "/edtplane_";
+    // string sdfPath3 = current_filepath + "/../../" + edt_root + "L3_minus_drilling_256" + "/edtplane_";
     
     
     cerr << "SDF path: " << sdfPath << endl;
     cerr << "SDF path1: " << sdfPath1 << endl;
-    cerr << "SDF path2: " << sdfPath2 << endl;
-    cerr << "SDF path3: " << sdfPath3 << endl;
+    // cerr << "SDF path2: " << sdfPath2 << endl;
+    // cerr << "SDF path3: " << sdfPath3 << endl;
 
     int num_sdfimages = sdfImages->loadFromFiles(sdfPath, "png", 512);
     int num_sdfimages1 = sdfImages1->loadFromFiles(sdfPath1, "png", 512);
-    int num_sdfimages2 = sdfImages2->loadFromFiles(sdfPath2, "png", 512);
-    int num_sdfimages3 = sdfImages3->loadFromFiles(sdfPath3, "png", 512);
+    // int num_sdfimages2 = sdfImages2->loadFromFiles(sdfPath2, "png", 512);
+    // int num_sdfimages3 = sdfImages3->loadFromFiles(sdfPath3, "png", 512);
 
     cout << "# of sdfimages in SDF path: " << num_sdfimages << endl;
     cout << "# of sdfimages in SDF path1: " << num_sdfimages1 << endl;
-    cout << "# of sdfimages in SDF path2: " << num_sdfimages2 << endl;
-    cout << "# of sdfimages in SDF path3: " << num_sdfimages3 << endl;
+    // cout << "# of sdfimages in SDF path2: " << num_sdfimages2 << endl;
+    // cout << "# of sdfimages in SDF path3: " << num_sdfimages3 << endl;
     
     if(num_sdfimages > 0){
         sdfTex->setImage(sdfImages);
         sdfTex1->setImage(sdfImages1);
-        sdfTex2->setImage(sdfImages2);
+        // sdfTex2->setImage(sdfImages2);
 
         m_volumeObject->getInternalVolume()->m_metallicTexture = sdfTex;
         m_volumeObject->getInternalVolume()->m_metallicTexture->setTextureUnit(GL_TEXTURE3);
@@ -237,8 +234,8 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
         m_volumeObject->getInternalVolume()->m_roughnessTexture = sdfTex1;
         m_volumeObject->getInternalVolume()->m_roughnessTexture->setTextureUnit(GL_TEXTURE4);
 
-        m_volumeObject->getInternalVolume()->m_aoTexture = sdfTex2;
-        m_volumeObject->getInternalVolume()->m_aoTexture->setTextureUnit(GL_TEXTURE5);
+        // m_volumeObject->getInternalVolume()->m_aoTexture = sdfTex2;
+        // m_volumeObject->getInternalVolume()->m_aoTexture->setTextureUnit(GL_TEXTURE5);
 
         cerr << "FOUND SDF TEXTURE" << endl;
 
@@ -262,27 +259,22 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
 
     //TODO: Change this hardcoded root
     EdtContainer cont(bone_edt_name + ".edt", bone_edt_name, vector<int>{255, 255, 255}, 1.0, 1.0);
-    // EdtContainer cont( "L1_minus_drilling.edt", "L1_minus_drilling", vector<int>{255, 255, 255}, 1.0, 1.0);
 
     this->bone_edt_cont = cont;
-    //TODO: Change this hardcoded root
-    cout << edt_root << endl;
-
     this->bone_edt_cont.load_grid(edt_root);
-    // this->bone_edt_cont.load_grid("/home/hishida3/volumetric_drilling/resources/edt_grids/spine_P0_256/");
 
     // Sample access
-    unsigned int res[3];
-    this->edt_list.list[0].get_resolution(res);
-    printf("%s: (%d %d %d)\n", this->edt_list.list[0].name.c_str(),
-           this->edt_list.list[0].rgb[0], this->edt_list.list[0].rgb[1], this->edt_list.list[0].rgb[2]);
-    printf("resolution: %d %d %d\n", res[0], res[1], res[2]);
+    // unsigned int res[3];
+    // this->edt_list.list[0].get_resolution(res);
+    // printf("%s: (%d %d %d)\n", this->edt_list.list[0].name.c_str(),
+    //        this->edt_list.list[0].rgb[0], this->edt_list.list[0].rgb[1], this->edt_list.list[0].rgb[2]);
+    // printf("resolution: %d %d %d\n", res[0], res[1], res[2]);
 
 
 
     //*******************
     // BeeP Audio Loading
-    //*******************
+    // //*******************
 
     m_beepAudioBuffer = new cAudioBuffer();
     string beepAudioFilepath = "../../resources/sounds/drill.wav";
@@ -343,7 +335,7 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
     //Added for SDF based textures
     m_volumeObject->getShaderProgram()->setUniformi("sdfVolume", C_TU_METALLIC);
     m_volumeObject->getShaderProgram()->setUniformi("sdfVolume1", C_TU_ROUGHNESS);
-    m_volumeObject->getShaderProgram()->setUniformi("sdfVolume2", C_TU_AO);
+    // m_volumeObject->getShaderProgram()->setUniformi("sdfVolume2", C_TU_AO);
 
     static double last_time = 0.0;
 
@@ -453,30 +445,30 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         // Audio Playing
         //*************************
 
-        // if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) < -1.0)
-        // {
-        //     m_drillManager.setAudioPitch(2.0);
-        // }
-        // else
-        // {
-        //     m_drillManager.setAudioPitch(1.0);
-        // }
+        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) < -1.0)
+        {
+            m_drillManager.setAudioPitch(1.0);
+        }
+        else
+        {
+            m_drillManager.setAudioPitch(1.0);
+        }
 
 
 
-        // if (m_beepAudioSource)
-        // {
+        if (m_beepAudioSource)
+        {
 
-        //     if (min_distance < edt_list.list[min_index].audio_thres && m_flag_sdf)
-        //     {
-        //         m_beepAudioSource->play();
-        //     }
-        //     else
-        //     {
-        //         m_beepAudioSource->stop();
-        //     }
+            if (min_distance < edt_list.list[min_index].audio_thres && m_flag_sdf)
+            {
+                m_beepAudioSource->play();
+            }
+            else
+            {
+                m_beepAudioSource->stop();
+            }
         
-        // }
+        }
     }
 
 
