@@ -206,8 +206,11 @@ void DrillManager::update(double dt)
     }
     else if(m_hapticDevice->isDeviceAvailable()){
         m_hapticDevice->getTransform(m_T_i);
+        cMatrix3d rotation_offset;
+        rotation_offset.setExtrinsicEulerRotationDeg(0, 0, -50, C_EULER_ORDER_XYZ);
+        m_T_i.setLocalRot(rotation_offset * m_T_i.getLocalRot());
         m_hapticDevice->getLinearVelocity(m_V_i);
-        m_V_i = T_c_w.getLocalRot() * (m_V_i / m_toolCursorList[0]->getWorkspaceScaleFactor());
+        m_V_i = rotation_offset * T_c_w.getLocalRot() * (m_V_i / m_toolCursorList[0]->getWorkspaceScaleFactor());
         m_T_d.setLocalPos(m_T_d.getLocalPos() + (m_V_i * 0.4 * !m_deviceClutch * !m_camClutch));
         m_T_d.setLocalRot(T_c_w.getLocalRot() * m_T_i.getLocalRot());
 
