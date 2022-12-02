@@ -52,6 +52,14 @@ cmake ..
 make
 ```
 
+### 1.4 Add another remote to catch up with Adnan's commit
+Create a new remote and enable fetching.
+
+```bash
+git remote add adnan_repo git@github.com:adnanmunawar/volumetric_drilling.git
+git fetch adnan_repo
+```
+
 ## 2 Generate anatomy and SDF grids
 ### 2.0 Install required packages
 
@@ -102,4 +110,13 @@ structure name: L1_minus_drilling, L2_minus_drilling, L3_minus_drilling, Vertebr
 cd <volumetric_plugin_path>/build
 ./EdtImageGeneration
 ```
+
+### Trouble shooting
+If the simulation runs low (~8hz), GPU must be disabled. Please try the following command and make sure a,mbf process is visble in `nvidia-smi`.
+
+```bash
+sudo prime-select nvidia
+```
+
+
 
