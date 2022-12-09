@@ -27,7 +27,7 @@ BODY 1mm:
     iy: 0.0
     iz: 0.0
   collision margin: 0.001
-  scale: 1.0
+  scale: 0.48659
   location:
     position:
       x: -5.0
@@ -81,7 +81,7 @@ BODY 2mm:
     iy: 0.0
     iz: 0.0
   collision margin: 0.001
-  scale: 1.0
+  scale: 0.48659
   location:
     position:
       x: -5.0
@@ -135,7 +135,7 @@ BODY 4mm:
     iy: 0.0
     iz: 0.0
   collision margin: 0.001
-  scale: 1.0
+  scale: 0.48659
   location:
     position:
       x: -5.0
@@ -189,7 +189,7 @@ BODY 6mm:
     iy: 0.0
     iz: 0.0
   collision margin: 0.001
-  scale: 1.0
+  scale: 0.48659 #1.0
   location:
     position:
       x: -5.0

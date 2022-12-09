@@ -98,12 +98,15 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     string edt_root = var_map["edt"].as<string>();
     string sdf_path = var_map["sdf"].as<string>();
     string bone_edt_name = var_map["bone"].as<string>();
+    
+    int cond = var_map["condition"].as<int>();
+    // cout << "condition" << cond << endl;
     edt_root = edt_root + "/";
 
 
 
     m_zeroColor = cColorb(0x00, 0x00, 0x00, 0x00);
-    m_boneColor = cColorb(255, 249, 219, 255);
+    m_boneColor = cColorb(240, 214, 144, 255);
     m_storedColor = cColorb(0x00, 0x00, 0x00, 0x00);
 
     m_worldPtr = a_afWorld;
@@ -277,7 +280,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     // //*******************
 
     m_beepAudioBuffer = new cAudioBuffer();
-    string beepAudioFilepath = "../../resources/sounds/drill.wav";
+    string beepAudioFilepath = "../../resources/sounds/tone_440hz.wav";
     if (m_beepAudioBuffer->loadFromFile(beepAudioFilepath))
     {
         cout << " Beep sound Loaded" << endl;
@@ -337,6 +340,20 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
     m_volumeObject->getShaderProgram()->setUniformi("sdfVolume1", C_TU_ROUGHNESS);
     // m_volumeObject->getShaderProgram()->setUniformi("sdfVolume2", C_TU_AO);
 
+    cVector3d L1_13;
+    L1_13.set(0.4235, 0.196,  0.155);
+    cVector3d L1_2;
+    L1_2.set(0.4335, 0.255,  0.196);
+    cVector3d L1_46;
+    L1_46.set(0.2825, 0.4645, 0.2825);
+    cVector3d L1_5;
+    L1_5.set(0.3745, 0.202, 0.1705);
+
+    m_volumeObject->getShaderProgram()->setUniform("uL_13", L1_13);
+    m_volumeObject->getShaderProgram()->setUniform("uL_2", L1_2);
+    m_volumeObject->getShaderProgram()->setUniform("uL_46", L1_46);
+    m_volumeObject->getShaderProgram()->setUniform("uL_5", L1_5);
+
     static double last_time = 0.0;
 
     double dt = m_worldPtr->getWallTime() - last_time;
@@ -384,10 +401,10 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
             }
 
             //Publisher for voxels removed
-            if(m_storedColor != m_boneColor)
-            {
-                m_panelManager.setVisible(m_warningLabel, false);
-            }
+            // if(m_storedColor != m_boneColor)
+            // {
+            //     m_panelManager.setVisible(m_warningLabel, true);
+            // }
         }
 
         // mark voxel for update
@@ -395,30 +412,30 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         m_flagMarkVolumeForUpdate = true;
     }
     // remove warning panel
-    else
-    {
-        m_panelManager.setVisible(m_warningLabel, false);
-    }
+    // else
+    // {
+    //     m_panelManager.setVisible(m_warningLabel, false);
+    // }
 
     ////////////////////////////////////////////////////////////////////////
     // EDT calculation
     ////////////////////////////////////////////////////////////////////////
-    cTransform world_T_voxel = m_voxelObj->getLocalTransform();
+    cTransform world_T_voxel = m_voxelObj->getLocalTransform(); // Position and Orientation of the anatomy
     world_T_voxel.invert();
     cTransform voxel_T_tool = world_T_voxel * m_drillManager.m_T_d;
 
-    if (abs(voxel_T_tool.getLocalPos().x()) < 0.5 && abs(voxel_T_tool.getLocalPos().y()) < 0.5 && abs(voxel_T_tool.getLocalPos().z()) < 0.5)
+    // x: 0.597, y: 0.571, z: 10
+    vector<double> dims = {0.597, 0.571, 1.0};
+    if (abs(voxel_T_tool.getLocalPos().x()) < 0.5 * dims[0] && abs(voxel_T_tool.getLocalPos().y()) < 0.5 * dims[1] && abs(voxel_T_tool.getLocalPos().z()) < 0.5 * dims[2])
     {
-        // cout << "EDT working ..." << endl;
         unsigned int res[3];
         edt_list.list[0].get_resolution(res);
-        index_x = round((voxel_T_tool.getLocalPos().x() + 0.5) * res[0]);
-        index_y = -round((voxel_T_tool.getLocalPos().y() - 0.5) * res[1]);
-        index_z = round((voxel_T_tool.getLocalPos().z() + 0.5) * res[2]);
-        // cout << index_x << "," << index_y << "," << index_z << endl;
+        index_x =  round((voxel_T_tool.getLocalPos().x() + 0.5 * dims[0]) / dims[0] * res[0]);
+        index_y = -round((voxel_T_tool.getLocalPos().y() - 0.5 * dims[1]) / dims[1] * res[1]);
+        index_z =  round((voxel_T_tool.getLocalPos().z() + 0.5 * dims[2]) / dims[2] * res[2]);
 
         std::string min_name = "XXX";
-        double min_distance = 1000;
+        min_distance = 1000;
         int min_index;
         unsigned int min_color[3];
 
@@ -436,18 +453,60 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                 min_color[2] = edt_list.list[i].rgb[2];
             }
         }
-        min_distance = min_distance / 4 - m_drillManager.m_activeDrill->m_size / 0.02014;
-        m_panelManager.setText(m_distanceLabel, min_name + ": " + cStr(min_distance) + " mm");
-        // m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
+        min_distance = min_distance / 2.13 - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim;
+        m_panelManager.setText(m_distanceLabel, cStr(min_distance) + " mm");
+        m_panelManager.setVisible(m_distanceLabel, true);
 
+
+
+        m_panelManager.setText(m_warningLabel, "Red region breached");
+        m_panelManager.setVisible(m_warningLabel, false);
+
+
+
+        // m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
+        m_L1_13_Color = cColorb(216, 100, 79,  255);
+        m_L1_2_Color  = cColorb(221, 130, 100, 255);
+        m_L1_46_Color = cColorb(144, 237, 144, 255);
+        m_L1_5_Color  = cColorb(191, 103, 87, 255);
+
+
+        if(m_storedColor != m_zeroColor)
+            {   
+                cout << (m_storedColor == m_L1_13_Color) << ": " <<(m_storedColor == m_L1_2_Color) << ": " <<(m_storedColor == m_L1_46_Color) << ": " <<(m_storedColor == m_L1_5_Color) << endl;
+                // cout << "Stored color:" << endl;
+                // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": " 
+                //<<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
+                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim< 2.0 ||
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)/ 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 2.0)
+                {
+                    
+                    m_panelManager.setText(m_warningLabel, "Red region breached");
+                    m_panelManager.setVisible(m_warningLabel, false);
+                }
+                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim< 4.0 ||
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) / 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim< 4.0)
+                {
+                    m_panelManager.setVisible(m_warningLabel, false);
+                    m_panelManager.setText(m_warningLabel, "Yellow region breached");
+                }
+
+
+            }
+        else {
+            m_panelManager.setVisible(m_warningLabel, false);
+       
+        }
+        // m_panelManager.setText(m_warningLabel, "Red region breached");
+        // m_panelManager.setVisible(m_warningLabel, true);
        
         //*************************
         // Audio Playing
         //*************************
 
-        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) < -1.0)
+        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)/ 4 - m_drillManager.m_activeDrill->m_size / 0.02014 < -1.0)
         {
-            m_drillManager.setAudioPitch(1.0);
+            m_drillManager.setAudioPitch(1.5);
         }
         else
         {
@@ -459,7 +518,7 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         if (m_beepAudioSource)
         {
 
-            if (min_distance < edt_list.list[min_index].audio_thres && m_flag_sdf)
+            if (min_distance < 1.0)
             {
                 m_beepAudioSource->play();
             }
@@ -470,8 +529,22 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         
         }
     }
+    else {
+        m_panelManager.setVisible(m_warningLabel, false);
+        m_panelManager.setVisible(m_distanceLabel, false);
+    }
 
 
+    double force_offset = 1.0;
+    double max_force_offset = 1.0;
+    double thres = 2.0;
+
+    // if (min_distance < thres && min_distance > 0){
+    //     force_offset =  force_offset - max_force_offset * (thres - min_distance);
+    // }
+    // else {
+    //     force_offset = 0.0;
+    // }
 
 
 
@@ -483,7 +556,12 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
 
     // check if device remains stuck inside voxel object
     // Also orient the force to match the camera rotation
-    cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * m_drillManager.m_targetToolCursor->getDeviceLocalForce();
+    // cVector3d force = cVector3d(force_offset, force_offset, force_offset) * cTranspose(m_mainCamera->getLocalRot()) * m_drillManager.m_targetToolCursor->getDeviceLocalForce();
+    cVector3d force_dir = m_drillManager.m_targetToolCursor->getDeviceLocalForce();
+    force_dir.normalize();
+    
+    // cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce() + force_dir * force_offset);
+    cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce());
     if (m_drillManager.m_isOn){
         force += (cVector3d(1.0, 1.0, 1.0) * m_waveGenerator.generate(dt));
     }
@@ -652,6 +730,8 @@ void afVolmetricDrillingPlugin::initializeLabels()
     m_warningLabel->setTransparencyLevel(0.6);
 
     m_panelManager.addPanel(m_warningLabel, 0.5, 0.5, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
+    m_panelManager.setVisible(m_warningLabel, false);
+
 
     m_volumeSmoothingLabel = new cLabel(font);
     m_volumeSmoothingLabel->m_fontColor.setRed();
@@ -667,7 +747,7 @@ void afVolmetricDrillingPlugin::initializeLabels()
     m_distanceLabel->setFontScale(1.0);
     m_distanceLabel->setColor(cColorf(0.6, 0., 0., 1.0));
 
-    m_panelManager.addPanel(m_distanceLabel, 0.3, 0.6, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
+    m_panelManager.addPanel(m_distanceLabel, 0.4, 0.6, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
     
 
 
@@ -783,7 +863,7 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
             cerr << "INFO! REMOVAL THRESHOLD " << val << endl;
         }
 
-        // Reset the drill pose
+        // Reset the drill pose b                                             
         if (a_key == GLFW_KEY_R){
             cerr << "INFO! RESETTING THE DRILL" << endl;
             m_drillManager.reset();
@@ -999,7 +1079,7 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         else if (a_key == GLFW_KEY_K){
             m_drillManager.m_show = !m_drillManager.m_show;
             m_drillManager.m_activeDrill->m_rigidBody->m_visualMesh->setShowEnabled(m_drillManager.m_show);
-            m_drillManager.m_burrMesh->setShowEnabled(m_drillManager.m_show);
+            // m_drillManager.m_burrMesh->setShowEnabled(m_drillManager.m_show);
 
         }
 

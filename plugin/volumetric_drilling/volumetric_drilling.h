@@ -150,6 +150,12 @@ private:
     // EDT resolution
     int edtres;
 
+    cColorb m_L1_13_Color;
+    cColorb m_L1_2_Color ;
+    cColorb m_L1_46_Color;
+    cColorb m_L1_5_Color ;
+    double min_distance = 1000;
+
     int index_x;
     int index_y;
     int index_z;

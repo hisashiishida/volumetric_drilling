@@ -5,18 +5,26 @@ uniform vec3 uGradientDelta;
 uniform sampler3D uVolume;
 uniform sampler3D sdfVolume;
 uniform sampler3D sdfVolume1;
-uniform sampler3D sdfVolume2;
+uniform sampler2DShadow shadowMap;
 uniform float uIsosurface;
 uniform float uResolution;
 
 varying vec4 vPosition;
 uniform bool uSmoothVolume;
 uniform int uSmoothingLevel;
+uniform int uEnableShadow;
+
+uniform vec3 uL_13;
+uniform vec3 uL_2;
+uniform vec3 uL_46;
+uniform vec3 uL_5;
+
 
 vec3 dx = vec3(uGradientDelta.x, 0.0, 0.0);
 vec3 dy = vec3(0.0, uGradientDelta.y, 0.0);
 vec3 dz = vec3(0.0, 0.0, uGradientDelta.z);
 
+float c_value = 0.4;
 
 //----------------------------------------------------------------------
 // Finds the entering intersection between a ray e1+d and the volume's
@@ -73,24 +81,25 @@ vec3 refine(vec3 a, vec3 b, float isosurface, float direction)
     return b;
 }
 
-vec4 color_overlay(vec4 sum, float sdf_distance, float sdf_distance1, float thres_red, float thres_green)
-{
+vec3 color_overlay(vec4 color, float sdf_distance, float sdf_distance1, float thres_red, float thres_green)
+{   
+    vec3 sum;
     if (sdf_distance > thres_green && sdf_distance1 > thres_green)
     {
       sum.r = 0.0;
-      sum.g = 0.8;
+      sum.g = c_value;
       sum.b = 0.0;
     }
 
     else if ((sdf_distance < thres_green && sdf_distance > thres_red) || (sdf_distance1 < thres_green && sdf_distance1 > thres_red))
     {
-      sum.r = 0.8;
-      sum.g = 0.8;
+      sum.r = c_value;
+      sum.g = c_value;
       sum.b = 0.0;
     }
     else if ((sdf_distance < thres_red && sdf_distance > 0.0) || (sdf_distance1 < thres_red && sdf_distance1 > 0.0))
     {
-      sum.r = 1.0;
+      sum.r = c_value;
       sum.g = 0.0;
       sum.b = 0.0;
     }
@@ -100,24 +109,25 @@ vec4 color_overlay(vec4 sum, float sdf_distance, float sdf_distance1, float thre
 }
 
 
-vec4 color_overlay_inner(vec4 sum, float sdf_distance, float thres_red, float thres_green)
-{
+vec3 color_overlay_inner(vec4 color, float sdf_distance, float thres_red, float thres_green)
+{ 
+  vec3 sum;
   if ((sdf_distance < thres_red && sdf_distance > 0.0))
   {
-    sum.r = 1.0;
+    sum.r = c_value;
     sum.g = 0.0;
     sum.b = 0.0;
   }
   else if ((sdf_distance < thres_green && sdf_distance > thres_red))
   {
-    sum.r = 0.8;
-    sum.g = 0.8;
+    sum.r = c_value;
+    sum.g = c_value;
     sum.b = 0.0;
   }
   else if ((sdf_distance > thres_green))
   {
     sum.r = 0.0;
-    sum.g = 0.8;
+    sum.g = c_value;
     sum.b = 0.0;
   }
   return sum;
@@ -165,6 +175,9 @@ void main(void)
     vec4 sum = vec4(0.0);
     vec3 tc = gl_TexCoord[0].stp + t_entry * tc_step / t_step;
 
+    vec4 dpos = vPosition;
+
+
     for (float t = t_entry; t < 0.0; t += t_step, tc += tc_step)
     {
         // sample the volume for intensity (red channel)
@@ -200,28 +213,12 @@ void main(void)
             vec3 position = vPosition.xyz + (t - dt * t_step) * raydir;
             vec3 normal = -normalize(nabla);
             vec3 view = -raydir;
-            vec3 colour = shade(position, view, normal) * texture3D(uVolume, tcr).rgb / uIsosurface;
-            sum = vec4(colour, 1.0);
-
-            // calculate fragment depth
-            vec4 clip = gl_ModelViewProjectionMatrix * vec4(position, 1.0);
-            gl_FragDepth = (gl_DepthRange.diff * clip.z / clip.w + gl_DepthRange.near + gl_DepthRange.far) * 0.5;
 
 
-            // vec3 reference_point = vec3(0.3, 0.3,0.0);
-            // if(position.x > 0.0 && position.y > 0.0 && position.z > 0.0)
-            // if(length(position.xyz - reference_point) < 0.35)
-            // {
-            //   sum.r += 5.0 * ( 0.35 - length(position.xyz - reference_point));
-            // }
-            
             vec3 sdf_t = tcr;
-
             // float sdf_distance = texture3D(sdfVolume, tcr).r - texture3D(sdfVolume, tcr).b;
             float sdf_distance = texture3D(sdfVolume, sdf_t).r - texture3D(sdfVolume, sdf_t).b;
             float sdf_distance1 = texture3D(sdfVolume1, sdf_t).r - texture3D(sdfVolume1, sdf_t).b;
-            float sdf_distance2 = texture3D(sdfVolume2, sdf_t).r - texture3D(sdfVolume2, sdf_t).b;
-            // if (sdf_distance > -0.001 && sdf_distance < 0.001)
 
 
             ///////////////////////////
@@ -240,38 +237,57 @@ void main(void)
             // section 4 & 6: (144, 238, 144)
             // section 5    : ( 14,  37, 245)
 
-            vec3 L1_13 = vec3(0.4235, 0.196,  0.155);
-            vec3 L1_2  = vec3(0.4335, 0.255,  0.196);
-            vec3 L1_46 = vec3(0.2825, 0.4645, 0.2825);
-            vec3 L1_5  = vec3(0.3745, 0.202, 0.1705);
+            // vec3 L1_13 = vec3(0.4235, 0.196,  0.155);
+            // vec3 L1_2  = vec3(0.4335, 0.255,  0.196);
+            // vec3 L1_46 = vec3(0.2825, 0.4645, 0.2825);
+            // vec3 L1_5  = vec3(0.3745, 0.202, 0.1705);
             
-            float thres_red = 0.01;   // < thres_red is colored red
-            float thres_green = 0.02; // > thres_green is colored green
+            vec3 L1_13 = uL_13;
+            vec3 L1_2  = uL_2;
+            vec3 L1_46 = uL_46;
+            vec3 L1_5  = uL_5;
 
-            float dis = 0.005;
+            
 
+            
+            float thres_red = 0.001;   // < thres_red is colored red
+            float thres_green = 0.005; // > thres_green is colored green
+
+            float dis = 0.02;
+
+            vec3 color_sdf;
             // For section 1 & 3
             if (texture3D(uVolume, tcr).r > L1_13[0] - dis && texture3D(uVolume, tcr).r < L1_13[0] + dis && texture3D(uVolume, tcr).g > L1_13[1] - dis && texture3D(uVolume, tcr).g < L1_13[1] + dis && texture3D(uVolume, tcr).b > L1_13[2] - dis && texture3D(uVolume, tcr).b < L1_13[2] + dis){
-              sum = color_overlay(sumc, sdf_distance, sdf_distance1, thres_red, thres_green);
-              // sum.r = 1.0;
+              color_sdf = color_overlay(texture3D(uVolume, tcr), sdf_distance, sdf_distance1, thres_red, thres_green);
             }
 
             // For section 2 
-            if (texture3D(uVolume, tcr).r > L1_2[0] - dis && texture3D(uVolume, tcr).r < L1_2[0] + dis && texture3D(uVolume, tcr).g > L1_2[1] - dis && texture3D(uVolume, tcr).g < L1_2[1] + dis && texture3D(uVolume, tcr).b > L1_2[2] - dis && texture3D(uVolume, tcr).b < L1_2[2] + dis){
-              sum = color_overlay_inner(sum, sdf_distance, thres_red, thres_green);
-
-
+            else if (texture3D(uVolume, tcr).r > L1_2[0] - dis && texture3D(uVolume, tcr).r < L1_2[0] + dis && texture3D(uVolume, tcr).g > L1_2[1] - dis && texture3D(uVolume, tcr).g < L1_2[1] + dis && texture3D(uVolume, tcr).b > L1_2[2] - dis && texture3D(uVolume, tcr).b < L1_2[2] + dis){
+              color_sdf = vec3(0.0, 0.296, 0.5);
             }
 
             // For section 4 & 6
-            if (texture3D(uVolume, tcr).r > L1_46[0] - dis && texture3D(uVolume, tcr).r < L1_46[0] + dis && texture3D(uVolume, tcr).g > L1_46[1] - dis && texture3D(uVolume, tcr).g < L1_46[1] + dis && texture3D(uVolume, tcr).b > L1_46[2] - dis && texture3D(uVolume, tcr).b < L1_46[2] + dis){
-              sum = color_overlay(sum, sdf_distance, sdf_distance1, thres_red, thres_green);
+            else if (texture3D(uVolume, tcr).r > L1_46[0] - dis && texture3D(uVolume, tcr).r < L1_46[0] + dis && texture3D(uVolume, tcr).g > L1_46[1] - dis && texture3D(uVolume, tcr).g < L1_46[1] + dis && texture3D(uVolume, tcr).b > L1_46[2] - dis && texture3D(uVolume, tcr).b < L1_46[2] + dis){
+              color_sdf = color_overlay(texture3D(uVolume, tcr), sdf_distance, sdf_distance1, thres_red, thres_green);
             }
             
             // For section 5 
-            if (texture3D(uVolume, tcr).r > L1_5[0] - dis && texture3D(uVolume, tcr).r < L1_5[0] + dis && texture3D(uVolume, tcr).g > L1_5[1] - dis && texture3D(uVolume, tcr).g < L1_5[1] + dis && texture3D(uVolume, tcr).b > L1_5[2] - dis && texture3D(uVolume, tcr).b < L1_5[2] + dis){
-              sum = color_overlay_inner(sum, sdf_distance, thres_red, thres_green);
+            else if (texture3D(uVolume, tcr).r > L1_5[0] - dis && texture3D(uVolume, tcr).r < L1_5[0] + dis && texture3D(uVolume, tcr).g > L1_5[1] - dis && texture3D(uVolume, tcr).g < L1_5[1] + dis && texture3D(uVolume, tcr).b > L1_5[2] - dis && texture3D(uVolume, tcr).b < L1_5[2] + dis){
+              color_sdf = vec3(0.0, 0.296, 0.5);
             }
+
+            else{
+              color_sdf = texture3D(uVolume, tcr).rgb;
+            }
+
+            vec3 colour = shade(position, view, normal) * color_sdf.rgb / uIsosurface;
+            sum = vec4(colour, 1.0);
+
+            // calculate fragment depth
+            vec4 clip = gl_ModelViewProjectionMatrix * vec4(position, 1.0);
+            gl_FragDepth = (gl_DepthRange.diff * clip.z / clip.w + gl_DepthRange.near + gl_DepthRange.far) * 0.5;
+  
+            
 
             break;
         }
@@ -292,5 +308,4 @@ void main(void)
     else{
       gl_FragColor = sum;
     }
-    
 }

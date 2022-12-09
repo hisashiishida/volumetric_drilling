@@ -22,6 +22,12 @@ ls
 sudo ./linux-installation.sh 
 ```
 
+If the Phantom Omni device was not recognised during the initialization.
+Please try the following command again.
+
+```bash
+chmod a+rwx /dev/fw*
+
 
 ## Head Mount Display
 We are using VIVE PRO 2 for this project. 
