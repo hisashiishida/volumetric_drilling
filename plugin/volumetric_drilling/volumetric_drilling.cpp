@@ -72,7 +72,6 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
             ("fp", p_opt::value<string>()->default_value("/dev/input/js0"), "Footpedal joystick input file description E.g. /dev/input/js0)")
             ("mute", p_opt::value<bool>()->default_value(false), "Mute")
             ("gcdr", p_opt::value<double>()->default_value(30.0), "Gaze Calibration Marker Motion Duration")
-            // ("edt", p_opt::value<string>()->default_value("/edt_grids_256_spine1/"), "EDT root directory")
             ("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256"), "EDT root directory")
             ("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")
             ("bone", p_opt::value<string>()->default_value("L1_minus_drilling"), "Bone edt (ex. L1_minus_drilling)")
@@ -456,12 +455,8 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         min_distance = min_distance / 2.13 - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim;
         m_panelManager.setText(m_distanceLabel, cStr(min_distance) + " mm");
         m_panelManager.setVisible(m_distanceLabel, true);
-
-
-
-        m_panelManager.setText(m_warningLabel, "Red region breached");
-        m_panelManager.setVisible(m_warningLabel, false);
-
+        m_panelManager.setText(m_distanceLabel_right, cStr(min_distance) + " mm");
+        m_panelManager.setVisible(m_distanceLabel_right, true);
 
 
         // m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
@@ -471,30 +466,35 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         m_L1_5_Color  = cColorb(191, 103, 87, 255);
 
 
-        if(m_storedColor != m_zeroColor)
+        if(m_storedColor == m_L1_13_Color || m_storedColor == m_L1_46_Color)
             {   
-                cout << (m_storedColor == m_L1_13_Color) << ": " <<(m_storedColor == m_L1_2_Color) << ": " <<(m_storedColor == m_L1_46_Color) << ": " <<(m_storedColor == m_L1_5_Color) << endl;
+                // cout << (m_storedColor == m_L1_13_Color) << ": " <<(m_storedColor == m_L1_2_Color) << ": " <<(m_storedColor == m_L1_46_Color) << ": " <<(m_storedColor == m_L1_5_Color) << endl;
                 // cout << "Stored color:" << endl;
                 // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": " 
                 //<<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
-                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim< 2.0 ||
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)/ 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 2.0)
+                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)/ 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0)
                 {
                     
                     m_panelManager.setText(m_warningLabel, "Red region breached");
-                    m_panelManager.setVisible(m_warningLabel, false);
+                    m_panelManager.setVisible(m_warningLabel, true);
+                    m_panelManager.setText(m_warningLabel_right, "Red region breached");
+                    m_panelManager.setVisible(m_warningLabel_right, true);
                 }
-                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim< 4.0 ||
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) / 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim< 4.0)
+                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0 ||
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) / 2.13 -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0)
                 {
-                    m_panelManager.setVisible(m_warningLabel, false);
+                    m_panelManager.setVisible(m_warningLabel, true);
                     m_panelManager.setText(m_warningLabel, "Yellow region breached");
+                    m_panelManager.setText(m_warningLabel_right, "Yellow region breached");
+                    m_panelManager.setVisible(m_warningLabel_right, true);
                 }
 
 
             }
         else {
             m_panelManager.setVisible(m_warningLabel, false);
+            m_panelManager.setVisible(m_warningLabel_right, false);
        
         }
         // m_panelManager.setText(m_warningLabel, "Red region breached");
@@ -532,6 +532,8 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     else {
         m_panelManager.setVisible(m_warningLabel, false);
         m_panelManager.setVisible(m_distanceLabel, false);
+        m_panelManager.setVisible(m_warningLabel_right, false);
+        m_panelManager.setVisible(m_distanceLabel_right, false);
     }
 
 
@@ -539,12 +541,14 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     double max_force_offset = 1.0;
     double thres = 2.0;
 
-    // if (min_distance < thres && min_distance > 0){
-    //     force_offset =  force_offset - max_force_offset * (thres - min_distance);
-    // }
-    // else {
-    //     force_offset = 0.0;
-    // }
+    if (min_distance < thres && min_distance > 0){
+        removal_val = m_drillManager.m_activeDrill->getVoxelRemovalThreshold();
+        int val = cMax(1, int(removal_val - int((thres - min_distance)/thres)));
+        m_drillManager.m_activeDrill->setVoxelRemvalThreshold(val);
+    }
+    else {
+        m_drillManager.m_activeDrill->setVoxelRemvalThreshold(removal_val);
+    }
 
 
 
@@ -729,8 +733,20 @@ void afVolmetricDrillingPlugin::initializeLabels()
     m_warningLabel->setColor(cColorf(0.6, 0., 0., 1.0));
     m_warningLabel->setTransparencyLevel(0.6);
 
-    m_panelManager.addPanel(m_warningLabel, 0.5, 0.5, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
+    m_panelManager.addPanel(m_warningLabel, 0.3, 0.5, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
     m_panelManager.setVisible(m_warningLabel, false);
+
+    m_warningLabel_right = new cLabel(font);
+    m_warningLabel_right->m_fontColor.setWhite();
+    m_warningLabel_right->setText("WARNING! Critical Region Detected");
+    m_warningLabel_right->setCornerRadius(5, 5, 5, 5);
+    m_warningLabel_right->setShowPanel(true);
+    m_warningLabel_right->setColor(cColorf(0.6, 0., 0., 1.0));
+    m_warningLabel_right->setTransparencyLevel(0.6);
+
+    m_panelManager.addPanel(m_warningLabel_right, 0.7, 0.5, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
+    m_panelManager.setVisible(m_warningLabel_right, false);
+
 
 
     m_volumeSmoothingLabel = new cLabel(font);
@@ -745,9 +761,19 @@ void afVolmetricDrillingPlugin::initializeLabels()
     m_distanceLabel = new cLabel(font);
     m_distanceLabel->m_fontColor.setBlack();
     m_distanceLabel->setFontScale(1.0);
-    m_distanceLabel->setColor(cColorf(0.6, 0., 0., 1.0));
+    m_distanceLabel->setShowPanel(true);
+    m_distanceLabel->setColor(cColorf(1.0, 1., 1., 1.0));
 
-    m_panelManager.addPanel(m_distanceLabel, 0.4, 0.6, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
+    m_panelManager.addPanel(m_distanceLabel, 0.35, 0.6, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
+
+    //Add text for monitoring the distance from SDF
+    m_distanceLabel_right = new cLabel(font);
+    m_distanceLabel_right->m_fontColor.setBlack();
+    m_distanceLabel_right->setFontScale(1.0);
+    m_distanceLabel_right->setShowPanel(true);
+    m_distanceLabel_right->setColor(cColorf(1.0, 1., 1., 1.0));
+
+    m_panelManager.addPanel(m_distanceLabel_right, 0.65, 0.6, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
     
 
 

@@ -120,3 +120,15 @@ sudo prime-select nvidia
 
 
 
+
+
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP4_separate.seg.nrrd -p ../resources/volumes/spine_P4_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP7_separate.seg.nrrd -p ../resources/volumes/spine_P7_256/plane0
+
+
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP0_vis.seg.nrrd -p ../resources/volumes/spine_P0_visual_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP1_vis.seg.nrrd -p ../resources/volumes/spine_P1_visual_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP2_vis.seg.nrrd -p ../resources/volumes/spine_P2_visual_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP4_vis.seg.nrrd -p ../resources/volumes/spine_P4_visual_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP7_vis.seg.nrrd -p ../resources/volumes/spine_P7_visual_256/plane0
+

@@ -109,6 +109,7 @@ private:
 
     // warning pop-up label
     cLabel* m_warningLabel;
+    cLabel* m_warningLabel_right;
 
     // color property of bone
     cColorb m_boneColor;
@@ -140,6 +141,7 @@ private:
 
     //SDF related properties
     cLabel* m_distanceLabel;
+    cLabel* m_distanceLabel_right;
     cAudioSource* m_beepAudioSource = nullptr; 
     cAudioBuffer* m_beepAudioBuffer = nullptr; 
     cAudioDevice* m_beepAudioDevice = nullptr; 
@@ -163,6 +165,7 @@ private:
     cVector3d force_edt;
     bool m_flag_sdf = true;
     bool footpedal_pressed = false;
+    int removal_val;
 };
 
 
