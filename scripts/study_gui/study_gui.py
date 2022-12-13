@@ -29,6 +29,7 @@ class Ui(QtWidgets.QWidget):
             # radio_button.setGeometry(200, 150, 100, 40)
             radio_button.volume_name = vinfo.name
             radio_button.volume_adf = str(vinfo.adf_path)
+            radio_button.sdf = str(vinfo.sdf_path)
             radio_button.toggled.connect(self.radio_button_volume_selection)
             icon_path_str = str(vinfo.icon_path)
             print(icon_path_str)
@@ -41,6 +42,28 @@ class Ui(QtWidgets.QWidget):
             self.volumes_grid.addWidget(label, i, 1)
             if i == 0:
                 radio_button.setChecked(True)
+
+        ## Add new radion button to select your conditons
+        button1 = QtWidgets.QRadioButton("No Assistance")
+        button2 = QtWidgets.QRadioButton("Text")
+        button3 = QtWidgets.QRadioButton("Overlay")
+        self.volumes_grid.addWidget(button1, 7, 0)
+        self.volumes_grid.addWidget(button2, 7, 1)
+        self.volumes_grid.addWidget(button3, 7, 2)
+        self.conditon = 1
+        button1.clicked.connect(self.radio_button_condition_selection)
+        button2.clicked.connect(self.radio_button_condition_selection)
+        button3.clicked.connect(self.radio_button_condition_selection)
+        buttonup = QtWidgets.QRadioButton("Up")
+        buttonmiddle = QtWidgets.QRadioButton("Middle")
+        buttondown = QtWidgets.QRadioButton("Down")
+        self.volumes_grid.addWidget(buttonup, 6, 0)
+        self.volumes_grid.addWidget(buttonmiddle, 6, 1)
+        self.volumes_grid.addWidget(buttondown, 6, 2)
+        self.conditon = 1
+        buttonup.clicked.connect(self.radio_button_location_selection)
+        buttonmiddle.clicked.connect(self.radio_button_location_selection)
+        buttondown.clicked.connect(self.radio_button_location_selection)
 
         self.button_start_simulation = self.findChild(QtWidgets.QPushButton, 'button_start_simulation')
         self.button_start_simulation.setStyleSheet("background-color: GREEN")
@@ -97,7 +120,8 @@ class Ui(QtWidgets.QWidget):
             launch_file_adf_indices = launch_file_adf_indices + ',5'
         if self.button_launch_vr.isChecked():
             launch_file_adf_indices = launch_file_adf_indices + ',6'
-        args = ['--launch_file', str(self.gui_params.launch_file), '-l', launch_file_adf_indices, '-a', self.active_volume_adf]
+        # args = ['--launch_file', str(self.gui_params.launch_file), '-l', launch_file_adf_indices, '-a', self.active_volume_adf]
+        args = ['--launch_file', str(self.gui_params.launch_file), '-l', launch_file_adf_indices, '-a', self.active_volume_adf, '--edt', self.active_sdf_path]
         # self.study_manager.start_simulation(args)
         if self._ambf_process.state() != QProcess.Running:
             self._ambf_process.start(str(self.gui_params.ambf_executable_path), args)
@@ -123,6 +147,23 @@ class Ui(QtWidgets.QWidget):
         if button.isChecked():
             self.print_info('Active Volume is ' + button.volume_name)
             self.active_volume_adf = button.volume_adf
+            self.active_sdf_path = button.sdf
+    
+    def radio_button_condition_selection(self):
+        button = self.sender()
+        self.print_info('Active Condition is ' + button.text())
+        if (button.text() == "Text" or button.text() == "Overlay"):
+            self.study_manager.toggle_sdf_assistance(button.text())
+
+    def radio_button_location_selection(self):
+        button = self.sender()
+        self.print_info('Active Location is ' + button.text())
+        if button.text() == "Up":
+            self.active_volume_adf = self.active_volume_adf + "_0"
+        else if button.text() == "Middle":
+            self.active_volume_adf = self.active_volume_adf + "_1"
+        else if button.text() == "Down":
+            self.active_volume_adf = self.active_volume_adf + "_2"
 
     def is_ready_to_record(self):
         ready = True

@@ -99,6 +99,16 @@ class StudyManager:
     def reset_volume(self):
         self.send_xdotool_keycmd(self._get_ambf_main_window_handle(), 'alt+r')
 
+    def toggle_sdf_assistance(self, conditon):
+        print(conditon)
+        if conditon == "Condition 1":
+            print(conditon)
+            # self.send_xdotool_keycmd(self._get_ambf_main_window_handle(), 'alt+1')
+        elif conditon == "Condition 2":
+            self.send_xdotool_keycmd(self._get_ambf_main_window_handle(), 'alt+1')
+        elif conditon == "Condition 3":
+            self.send_xdotool_keycmd(self._get_ambf_main_window_handle(), 'alt+2')
+
     def send_xdotool_keycmd(self, window, key_str):
         if window is None:
             print("ERROR! AMBF Window Not Launched")
