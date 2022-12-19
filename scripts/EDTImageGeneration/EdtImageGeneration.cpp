@@ -52,7 +52,7 @@ int main()
     image.resize(width * height * 4);
     int z=0;
     double max_edt = 0;
-    int scale = res[2];
+    int scale = 600;
     for (z = 0; z < res[2]; z++){
         for(unsigned y = 0; y < height; y++){
             for(unsigned x = 0; x < width; x++) {

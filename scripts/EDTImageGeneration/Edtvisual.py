@@ -5,7 +5,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 # img_ori = Image.open('./../../edt_grids_RT147_256/EAC_256/edtplane_42.png')
 # img_ori = Image.open('./../../edt_grids_RT147_256/TMJ_256/edtplane_42.png')
-img_ori = Image.open('./../../edt_grids_RT147_256/Sinus_+_Dura_256/edtplane_42.png')
+# img_ori = Image.open('./../../edt_grids_RT147_256/Sinus_+_Dura_256/edtplane_42.png')
+img_ori = Image.open('./../../resources/edt_grids/sinus_1209_256/Segments1_256/edtplane_42.png')
 img_new = Image.new("RGB", img_ori.size)
 img_new.paste(img_ori) 
 img = np.array(img_new)

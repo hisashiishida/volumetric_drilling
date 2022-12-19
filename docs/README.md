@@ -104,7 +104,7 @@ if the color id is wrong, there gonna be error message during the runtime.
 Run `EdtImageGeneration` and select the folder name (ex. spine_P0) and structure name (ex. L1_minus drilling), and resolution (ex. 256).
 
 folder name: spine_P0, spine_P1, spine_P2, spine_P4, spine_P7
-structure name: L1_minus_drilling, L2_minus_drilling, L3_minus_drilling, Vertebral_foramen_256
+structure name: L1_minus_drilling, L2_minus_drilling, L3_minus_drilling, Vertebral_foramen
 
 ```bash 
 cd <volumetric_plugin_path>/build
@@ -112,7 +112,7 @@ cd <volumetric_plugin_path>/build
 ```
 
 ### Trouble shooting
-If the simulation runs low (~8hz), GPU must be disabled. Please try the following command and make sure a,mbf process is visble in `nvidia-smi`.
+If the simulation runs low (~8hz), GPU must be disabled. Please try the following command and make sure ambf process is visble in `nvidia-smi`.
 
 ```bash
 sudo prime-select nvidia
@@ -120,8 +120,9 @@ sudo prime-select nvidia
 
 
 
-
-
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP0_separate.seg.nrrd -p ../resources/volumes/spine_P0_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP1_separate.seg.nrrd -p ../resources/volumes/spine_P1_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP2_separate.seg.nrrd -p ../resources/volumes/spine_P2_256/plane0
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP4_separate.seg.nrrd -p ../resources/volumes/spine_P4_256/plane0
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP7_separate.seg.nrrd -p ../resources/volumes/spine_P7_256/plane0
 

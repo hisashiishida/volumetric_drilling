@@ -21,7 +21,7 @@ multibody configs:
   - "ADF/gaze_marker.yaml" #7
 
 
-  - "ADF/spine_256_P0.yaml" #8
+  - "ADF/spine_256_P0_0.yaml" #8
   - "ADF/spine_256_P1.yaml" #9
   - "ADF/spine_256_P2.yaml" #10
   - "ADF/spine_256_P4.yaml" #11

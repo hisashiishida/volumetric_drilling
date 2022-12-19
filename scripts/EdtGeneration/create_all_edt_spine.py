@@ -25,10 +25,10 @@ def create_edt_spine(input, output):
 
 
 spine_dict = {
-    "Vertebral_foramen": "181 228 255",
-    "L1_minus_drilling":  "219 244 20",
-    "L2_minus_drilling":  "182 156 219",
-    "L3_minus_drilling":  "214 230 130",
+    "Vertebral_foramen": "177, 121, 100", #181 228 255",
+    "L1_minus_drilling": "77,  63,  0",# "219 244 20",
+    "L2_minus_drilling": "110, 184, 209", #182 156 219",
+    "L3_minus_drilling": "188, 65, 28", #214 230 130",
 }
 
 if __name__ == "__main__":

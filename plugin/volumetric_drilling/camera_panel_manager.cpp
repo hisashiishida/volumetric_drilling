@@ -59,6 +59,10 @@ void CameraPanel::setFontColor(cColorf a_color){
     ((cLabel*)m_panel)->m_fontColor.set(a_color[0], a_color[1], a_color[2], a_color[3]);
 }
 
+void CameraPanel::setPanelColor(cColorf a_color){
+    ((cLabel*)m_panel)->setColor(a_color);
+}
+
 void CameraPanel::setText(string a_text)
 {
     ((cLabel*)m_panel)->setText(a_text);
@@ -152,6 +156,17 @@ bool CameraPanelManager::setText(cPanel* a_panel, string a_text){
         res = true;
         for (int i = 0 ; i < vec->size() ; i++){
             (*vec)[i]->setText(a_text);
+        }
+    }
+    return res;
+}
+bool CameraPanelManager::setPanelColor(cPanel *a_panel, cColorf a_color){
+    bool res = false;
+    CameraPanels* vec = getCameraPanels(a_panel);
+    if (vec){
+        res = true;
+        for (int i = 0 ; i < vec->size() ; i++){
+            (*vec)[i]->setPanelColor(a_color);
         }
     }
     return res;

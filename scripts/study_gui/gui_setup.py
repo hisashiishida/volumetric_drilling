@@ -3,11 +3,13 @@ import pathlib
 
 
 class VolumeInfo:
-    def __init__(self, name, adf_path, sdf_path, icon_path):
+    def __init__(self, name, adf_path, sdf_path, icon_path, unit, spacial_resolution):
         self.name = name
         self.adf_path = adf_path
         self.sdf_path = sdf_path
         self.icon_path = icon_path
+        self.unit = unit
+        self.spacial_resolution = spacial_resolution
 
     def print_info(self):
         print('ADF Path', self.adf_path)
@@ -32,10 +34,12 @@ class SetupGUI:
             adf_path = pathlib.Path(self.yaml_data[v]['adf_path']).resolve()
             sdf_path = pathlib.Path(self.yaml_data[v]['sdf_path'])
             icon_path = pathlib.Path(self.yaml_data[v]['icon_path']).resolve()
+            unit = self.yaml_data[v]['unit']
+            spacial_resolution = self.yaml_data[v]['spacial_resolution']
             name = self.yaml_data[v]['name']
             # print('Parsing: ', v, ' ADF Path: ', adf_path, ' Icon Path: ', icon_path)
             # new_volume_info = VolumeInfo(name, adf_path, icon_path)
-            new_volume_info = VolumeInfo(name, adf_path, sdf_path, icon_path)
+            new_volume_info = VolumeInfo(name, adf_path, sdf_path, icon_path, unit, spacial_resolution)
             self.volumes_info.append(new_volume_info)
 
     def print_volumes_info(self):

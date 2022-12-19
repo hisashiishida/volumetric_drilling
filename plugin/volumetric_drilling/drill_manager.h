@@ -78,6 +78,10 @@ public:
 
     DrillManager();
 
+    void setunit(double unit);
+    double getunit();
+
+
     void cleanup();
 
     int init(afWorldPtr a_worldPtr, CameraPanelManager* a_panelManager, p_opt::variables_map& opts);

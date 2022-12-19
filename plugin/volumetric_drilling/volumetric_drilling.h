@@ -166,6 +166,8 @@ private:
     bool m_flag_sdf = true;
     bool footpedal_pressed = false;
     int removal_val;
+    int cond = 0;
+    double space_res;
 };
 
 

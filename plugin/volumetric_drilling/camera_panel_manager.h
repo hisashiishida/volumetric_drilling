@@ -64,6 +64,7 @@ class CameraPanel{
 public:
     CameraPanel(cPanel* a_object, afCameraPtr a_camera, double a_xpos, double a_ypos, PanelReferenceOrigin a_reference, PanelReferenceType a_ref_type);
     void setFontColor(cColorf a_color);
+    void setPanelColor(cColorf a_color);
     void setText(string a_text);
     void setPos(double a_xpos, double a_ypos, PanelReferenceOrigin a_reference, PanelReferenceType a_refType);
     void setVisible(bool a_visible);
@@ -86,6 +87,7 @@ public:
     void addCamera(afCameraPtr a_camera);
     void addPanel(cPanel* a_panel, double a_xpos, double a_ypos, PanelReferenceOrigin a_reference, PanelReferenceType a_refType);
     bool setFontColor(cPanel* a_panel, cColorf a_color);
+    bool setPanelColor(cPanel* a_panel, cColorf a_color);
     bool setText(cPanel* a_panel, string a_text);
     bool setPos(cPanel* a_panel, double a_xpos, double a_ypos, PanelReferenceOrigin a_reference=PanelReferenceOrigin::CENTER, PanelReferenceType a_refType=PanelReferenceType::NORMALIZED);
     bool setVisible(cPanel* a_panel, bool a_visible);

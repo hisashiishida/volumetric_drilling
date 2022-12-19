@@ -15,17 +15,17 @@ VOLUME mastoidectomy_volume:
     # position: {x: -5.35, y: 0.0, z: 0.2} 
     orientation: {r: 0, p: 0, y: 3.14}
   scale: 1.0
-  dimensions: {x: 0.597, y: 0.571, z: 1.0} # Change the dimension according to the size and number of images
+  dimensions: {x: 0.5879, y: 0.617, z: 1.0} # Change the dimension according to the size and number of images
   images:
-    path: ../resources/volumes/spine_P7_visual_256/
+    path: ../resources/volumes/spine_P4_visual_256/
     prefix: plane00
     format: png
     count: 512
   shaders:
     path: ./shaders/volume/
     vertex: shader.vs
-    fragment: shader_color_over.fs
-    # fragment: shader.fs
+    # fragment: shader_color_over.fs
+    fragment: shader.fs
   color components:
       ambient:
         level: 1.0

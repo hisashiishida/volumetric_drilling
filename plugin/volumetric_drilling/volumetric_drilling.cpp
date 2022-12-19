@@ -75,7 +75,9 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
             ("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256"), "EDT root directory")
             ("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")
             ("bone", p_opt::value<string>()->default_value("L1_minus_drilling"), "Bone edt (ex. L1_minus_drilling)")
-            ("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcture name and resolution");
+            ("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcture name and resolution")
+            ("unit", p_opt::value<double>()->default_value(0.0), "mm to simulation unit")
+            ("spacial_resolution", p_opt::value<double>()->default_value(0.48), "mm to simulation unit");
 
 
     p_opt::variables_map var_map;
@@ -98,11 +100,11 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     string sdf_path = var_map["sdf"].as<string>();
     string bone_edt_name = var_map["bone"].as<string>();
     
-    int cond = var_map["condition"].as<int>();
-    // cout << "condition" << cond << endl;
+    cond = var_map["condition"].as<int>();
+    double unit = var_map["unit"].as<double>();
+    space_res = var_map["spacial_resolution"].as<double>();
+    cout << "Active condition: " << cond << endl;
     edt_root = edt_root + "/";
-
-
 
     m_zeroColor = cColorb(0x00, 0x00, 0x00, 0x00);
     m_boneColor = cColorb(240, 214, 144, 255);
@@ -198,46 +200,26 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     cTexture3dPtr sdfTex1 = cTexture3d::create();
     cMultiImagePtr sdfImages1 = cMultiImage::create();
 
-    // cTexture3dPtr sdfTex2 = cTexture3d::create();
-    // cMultiImagePtr sdfImages2 = cMultiImage::create();
-    // cMultiImagePtr sdfImages3 = cMultiImage::create();
-
-    string sdfPath = current_filepath + "/../../" + edt_root + sdf_path + "/edtplane_";
-    // string sdfPath = cur_path + "/edt_grids_256_spine1/SpinalCord_256/edtplane_";
-
-    string sdfPath1 = current_filepath + "/../../" + edt_root + bone_edt_name + "_256" + "/edtplane_";
-    // string sdfPath2 = current_filepath + "/../../" + edt_root + "L2_minus_drilling_256" + "/edtplane_";
-    // string sdfPath3 = current_filepath + "/../../" + edt_root + "L3_minus_drilling_256" + "/edtplane_";
+    string sdfPath = current_filepath + "/" + edt_root + sdf_path + "/edtplane_";
+    string sdfPath1 = current_filepath + "/" + edt_root + bone_edt_name + "_256" + "/edtplane_";
     
     
     cerr << "SDF path: " << sdfPath << endl;
     cerr << "SDF path1: " << sdfPath1 << endl;
-    // cerr << "SDF path2: " << sdfPath2 << endl;
-    // cerr << "SDF path3: " << sdfPath3 << endl;
 
     int num_sdfimages = sdfImages->loadFromFiles(sdfPath, "png", 512);
     int num_sdfimages1 = sdfImages1->loadFromFiles(sdfPath1, "png", 512);
-    // int num_sdfimages2 = sdfImages2->loadFromFiles(sdfPath2, "png", 512);
-    // int num_sdfimages3 = sdfImages3->loadFromFiles(sdfPath3, "png", 512);
 
     cout << "# of sdfimages in SDF path: " << num_sdfimages << endl;
     cout << "# of sdfimages in SDF path1: " << num_sdfimages1 << endl;
-    // cout << "# of sdfimages in SDF path2: " << num_sdfimages2 << endl;
-    // cout << "# of sdfimages in SDF path3: " << num_sdfimages3 << endl;
     
     if(num_sdfimages > 0){
         sdfTex->setImage(sdfImages);
         sdfTex1->setImage(sdfImages1);
-        // sdfTex2->setImage(sdfImages2);
-
         m_volumeObject->getInternalVolume()->m_metallicTexture = sdfTex;
         m_volumeObject->getInternalVolume()->m_metallicTexture->setTextureUnit(GL_TEXTURE3);
-
         m_volumeObject->getInternalVolume()->m_roughnessTexture = sdfTex1;
         m_volumeObject->getInternalVolume()->m_roughnessTexture->setTextureUnit(GL_TEXTURE4);
-
-        // m_volumeObject->getInternalVolume()->m_aoTexture = sdfTex2;
-        // m_volumeObject->getInternalVolume()->m_aoTexture->setTextureUnit(GL_TEXTURE5);
 
         cerr << "FOUND SDF TEXTURE" << endl;
 
@@ -249,17 +231,11 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     //*******************
     // EDT Loading
     //*******************
-    edt_root = current_filepath + "/../../" + edt_root;
-
-    //TODO: Change this hardcoded root
-    // edt_root = "/home/bigss/Laminectomy_SDF_based_assistance/edt_grids_256_spine1/";
+    edt_root = current_filepath + "/" + edt_root;
     cout << "EDT path: " << edt_root<< endl;
     this->edt_list.print_info();
     this->edt_list.load_all_grids(edt_root);
 
-    // EdtContainer(string p, string name, const vector<int> &rgb, const float force_thres=1.0, const float audio_thres=1.0)
-
-    //TODO: Change this hardcoded root
     EdtContainer cont(bone_edt_name + ".edt", bone_edt_name, vector<int>{255, 255, 255}, 1.0, 1.0);
 
     this->bone_edt_cont = cont;
@@ -285,8 +261,8 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
         cout << " Beep sound Loaded" << endl;
         m_beepAudioSource = new cAudioSource();
         m_beepAudioSource->setAudioBuffer(m_beepAudioBuffer);
-        m_beepAudioSource->setLoop(true);
-        m_beepAudioSource->setGain(2.0);
+        m_beepAudioSource->setLoop(false);
+        m_beepAudioSource->setGain(1.0);
     }
     else
     {
@@ -296,6 +272,15 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
         m_beepAudioBuffer = nullptr;
         cerr << "FAILED TO LOAD BEEP AUDIO FROM " << beepAudioFilepath << endl;
     }
+
+    //************************
+    // Unit for the simulator
+    //*************************
+     if (unit != 0.0){
+        m_drillManager.setunit(unit);
+        cout << "UNIT SET AS:" << unit << endl;        
+    }
+
 
 
     cBackground* background = new cBackground();
@@ -337,16 +322,15 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
     //Added for SDF based textures
     m_volumeObject->getShaderProgram()->setUniformi("sdfVolume", C_TU_METALLIC);
     m_volumeObject->getShaderProgram()->setUniformi("sdfVolume1", C_TU_ROUGHNESS);
-    // m_volumeObject->getShaderProgram()->setUniformi("sdfVolume2", C_TU_AO);
 
     cVector3d L1_13;
-    L1_13.set(0.4235, 0.196,  0.155);
+    L1_13.set(0.5 *0.4117, 0.5 *0.8039, 0.5 *0.4902);
     cVector3d L1_2;
-    L1_2.set(0.4335, 0.255,  0.196);
+    L1_2.set(0.5 *0.4353, 0.5 *0.7216, 0.5 *0.8235);
     cVector3d L1_46;
-    L1_46.set(0.2825, 0.4645, 0.2825);
+    L1_46.set(0.5 *0.4313, 0.5 *0.7843, 0.5 *0.4705);
     cVector3d L1_5;
-    L1_5.set(0.3745, 0.202, 0.1705);
+    L1_5.set(0.5 *0.4941, 0.5 *0.6314, 0.5 *0.7725);
 
     m_volumeObject->getShaderProgram()->setUniform("uL_13", L1_13);
     m_volumeObject->getShaderProgram()->setUniform("uL_2", L1_2);
@@ -429,6 +413,7 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     {
         unsigned int res[3];
         edt_list.list[0].get_resolution(res);
+        // Frame Tramsformation from Anatomy frame to SDF index frame
         index_x =  round((voxel_T_tool.getLocalPos().x() + 0.5 * dims[0]) / dims[0] * res[0]);
         index_y = -round((voxel_T_tool.getLocalPos().y() - 0.5 * dims[1]) / dims[1] * res[1]);
         index_z =  round((voxel_T_tool.getLocalPos().z() + 0.5 * dims[2]) / dims[2] * res[2]);
@@ -452,61 +437,74 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                 min_color[2] = edt_list.list[i].rgb[2];
             }
         }
-        min_distance = min_distance / 2.13 - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim;
+        min_distance = min_distance * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim;
         m_panelManager.setText(m_distanceLabel, cStr(min_distance) + " mm");
-        m_panelManager.setVisible(m_distanceLabel, true);
+        m_panelManager.setVisible(m_distanceLabel, false);
         m_panelManager.setText(m_distanceLabel_right, cStr(min_distance) + " mm");
-        m_panelManager.setVisible(m_distanceLabel_right, true);
+        m_panelManager.setVisible(m_distanceLabel_right, false);
 
 
         // m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
-        m_L1_13_Color = cColorb(216, 100, 79,  255);
-        m_L1_2_Color  = cColorb(221, 130, 100, 255);
-        m_L1_46_Color = cColorb(144, 237, 144, 255);
-        m_L1_5_Color  = cColorb(191, 103, 87, 255);
+        m_L1_13_Color = cColorb(105, 205, 125, 255); //0.4117, 0.8039, 0.4902
+        m_L1_2_Color  = cColorb(111, 184, 210, 255); //0.4353, 0.7216, 0.8235
+        m_L1_46_Color = cColorb(110, 200, 120, 255); //0.4313, 0.7843, 0.4705
+        m_L1_5_Color  = cColorb(126, 161, 197, 255); //0.4941, 0.6314, 0.7725
 
+        string warn_red;
+        string warn_yellow;
+        if (cond != 0){
 
-        if(m_storedColor == m_L1_13_Color || m_storedColor == m_L1_46_Color)
+            if (cond == 1){
+            warn_red = "Delicate anatomy breached!!";
+            warn_yellow = "[Caution] 1mm to delicate anatomy";
+            }
+           
+            else if (cond==2){
+                warn_red = "Red region breached!!";
+                warn_yellow = "[Caution] Yellow region breached";
+            }
+
+            if(m_storedColor != m_boneColor && m_storedColor != m_zeroColor)
             {   
                 // cout << (m_storedColor == m_L1_13_Color) << ": " <<(m_storedColor == m_L1_2_Color) << ": " <<(m_storedColor == m_L1_46_Color) << ": " <<(m_storedColor == m_L1_5_Color) << endl;
                 // cout << "Stored color:" << endl;
                 // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": " 
                 //<<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
-                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)/ 2.13 - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0)
+                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0)
                 {
-                    
-                    m_panelManager.setText(m_warningLabel, "Red region breached");
+                    m_panelManager.setText(m_warningLabel,  warn_red);
                     m_panelManager.setVisible(m_warningLabel, true);
-                    m_panelManager.setText(m_warningLabel_right, "Red region breached");
+                    m_panelManager.setText(m_warningLabel_right,  warn_red);
                     m_panelManager.setVisible(m_warningLabel_right, true);
+                    m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
+                    m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
                 }
-                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) / 2.13 - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0 ||
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) / 2.13 -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0)
+                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0 ||
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0)
                 {
                     m_panelManager.setVisible(m_warningLabel, true);
-                    m_panelManager.setText(m_warningLabel, "Yellow region breached");
-                    m_panelManager.setText(m_warningLabel_right, "Yellow region breached");
+                    m_panelManager.setText(m_warningLabel, warn_yellow);
+                    m_panelManager.setText(m_warningLabel_right, warn_yellow);
                     m_panelManager.setVisible(m_warningLabel_right, true);
+                    m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0.6, 0., 1.0));
+                    m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0.6, 0., 1.0));
                 }
-
-
             }
-        else {
-            m_panelManager.setVisible(m_warningLabel, false);
-            m_panelManager.setVisible(m_warningLabel_right, false);
-       
+            // else {
+            // m_panelManager.setVisible(m_warningLabel, false);
+            // m_panelManager.setVisible(m_warningLabel_right, false);
+            // }               
         }
-        // m_panelManager.setText(m_warningLabel, "Red region breached");
-        // m_panelManager.setVisible(m_warningLabel, true);
-       
+        
+        
         //*************************
         // Audio Playing
         //*************************
 
-        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)/ 4 - m_drillManager.m_activeDrill->m_size / 0.02014 < -1.0)
+        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim  < -1.0)
         {
-            m_drillManager.setAudioPitch(1.5);
+            m_drillManager.setAudioPitch(1.2);
         }
         else
         {
@@ -515,7 +513,7 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
 
 
 
-        if (m_beepAudioSource)
+        if (m_beepAudioSource && cond == 1)
         {
 
             if (min_distance < 1.0)
@@ -537,8 +535,8 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     }
 
 
-    double force_offset = 1.0;
-    double max_force_offset = 1.0;
+    double force_offset = 0.2;
+    double max_force_offset = 2.0;
     double thres = 2.0;
 
     if (min_distance < thres && min_distance > 0){
@@ -564,8 +562,8 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     cVector3d force_dir = m_drillManager.m_targetToolCursor->getDeviceLocalForce();
     force_dir.normalize();
     
-    // cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce() + force_dir * force_offset);
-    cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce());
+    cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce() + force_dir * force_offset);
+    // cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce());
     if (m_drillManager.m_isOn){
         force += (cVector3d(1.0, 1.0, 1.0) * m_waveGenerator.generate(dt));
     }
@@ -573,7 +571,7 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     m_drillManager.m_drillingPub->publishForceFeedback(force, force, m_worldPtr->getCurrentTimeStamp());
     double maxF = m_drillManager.m_hapticDevice->getSpecifications().m_maxLinearForce;
     double force_mag = cClamp(force.length(), 0.0, maxF);
-    m_drillManager.setAudioPitch(3.0 - force_mag / maxF);
+    // m_drillManager.setAudioPitch(3.0 - force_mag / maxF);
 
     if (m_flagStart)
     {
@@ -727,7 +725,6 @@ void afVolmetricDrillingPlugin::initializeLabels()
 
     m_warningLabel = new cLabel(font);
     m_warningLabel->m_fontColor.setWhite();
-    m_warningLabel->setText("WARNING! Critical Region Detected");
     m_warningLabel->setCornerRadius(5, 5, 5, 5);
     m_warningLabel->setShowPanel(true);
     m_warningLabel->setColor(cColorf(0.6, 0., 0., 1.0));
@@ -738,7 +735,6 @@ void afVolmetricDrillingPlugin::initializeLabels()
 
     m_warningLabel_right = new cLabel(font);
     m_warningLabel_right->m_fontColor.setWhite();
-    m_warningLabel_right->setText("WARNING! Critical Region Detected");
     m_warningLabel_right->setCornerRadius(5, 5, 5, 5);
     m_warningLabel_right->setShowPanel(true);
     m_warningLabel_right->setColor(cColorf(0.6, 0., 0., 1.0));

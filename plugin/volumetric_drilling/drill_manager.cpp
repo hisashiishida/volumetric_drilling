@@ -48,6 +48,14 @@ DrillManager::DrillManager(){
     m_units_mmToSim = 0.0049;
 }
 
+void DrillManager::setunit(double unit){
+    m_units_mmToSim = unit;    
+}
+
+double DrillManager::getunit(){
+    return m_units_mmToSim;
+}
+
 void DrillManager::cleanup()
 {
     for(auto tool : m_toolCursorList)
@@ -93,7 +101,7 @@ int DrillManager::init(afWorldPtr a_worldPtr, CameraPanelManager* a_panelManager
     }
 
     vector<int> drillTypes = {6, 1, 2, 4};
-    vector<int> voxelRemovalThresholds = {10, 1, 3, 6};
+    vector<int> voxelRemovalThresholds = {10, 1, 1, 3};
 
     for (int i = 0 ; i < drillTypes.size() ; i++){
         string drillName = to_string(drillTypes[i]) + "mm";
@@ -208,7 +216,7 @@ void DrillManager::update(double dt)
     else if(m_hapticDevice->isDeviceAvailable()){
         m_hapticDevice->getTransform(m_T_i);
         cMatrix3d rotation_offset;
-        rotation_offset.setExtrinsicEulerRotationDeg(0, 30, 0, C_EULER_ORDER_XYZ);
+        rotation_offset.setExtrinsicEulerRotationDeg(0, 30, -15, C_EULER_ORDER_XYZ);
         m_T_i.setLocalRot(rotation_offset * m_T_i.getLocalRot());
         m_hapticDevice->getLinearVelocity(m_V_i);
         m_V_i = rotation_offset * T_c_w.getLocalRot() * (m_V_i / m_toolCursorList[0]->getWorkspaceScaleFactor());
