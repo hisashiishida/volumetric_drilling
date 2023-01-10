@@ -168,6 +168,9 @@ private:
     int removal_val;
     int cond = 0;
     double space_res;
+    double red_thres = 1.0;
+    double yellow_thres = 2.0;
+    double m_alpha = 1.0;
 };
 
 

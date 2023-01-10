@@ -19,6 +19,8 @@ uniform vec3 uL_2;
 uniform vec3 uL_46;
 uniform vec3 uL_5;
 
+uniform vec3 uUnit;
+
 
 vec3 dx = vec3(uGradientDelta.x, 0.0, 0.0);
 vec3 dy = vec3(0.0, uGradientDelta.y, 0.0);
@@ -250,8 +252,8 @@ void main(void)
             
 
             
-            float thres_red = 0.001;   // < thres_red is colored red
-            float thres_green = 0.005; // > thres_green is colored green
+            float thres_red = 1.0 * uUnit[1];   // < thres_red is colored red
+            float thres_green = 2.0 * uUnit[1]; // > thres_green is colored green
 
             float dis = 0.05;
 

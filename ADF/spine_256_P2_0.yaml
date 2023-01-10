@@ -17,7 +17,7 @@ VOLUME mastoidectomy_volume:
   scale: 1.0
   dimensions: {x: 0.551, y: 0.5748, z: 1.0} # Change the dimension according to the size and number of images
   images:
-    path: ../resources/volumes/spine_P2_visual_256/
+    path: ../resources/volumes/spine_P2_L1_nocolor_256/
     prefix: plane00
     format: png
     count: 512

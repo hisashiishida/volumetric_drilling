@@ -133,3 +133,44 @@ python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP2_vi
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP4_vis.seg.nrrd -p ../resources/volumes/spine_P4_visual_256/plane0
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP7_vis.seg.nrrd -p ../resources/volumes/spine_P7_visual_256/plane0
 
+
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P0_test_segments/segmentP0_L1_color_test.seg.nrrd -p ../resources/volumes/spine_P0_L1_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P0_test_segments/segmentP0_L1_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P0_L1_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P0_test_segments/segmentP0_L2_color_test.seg.nrrd -p ../resources/volumes/spine_P0_L2_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P0_test_segments/segmentP0_L2_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P0_L2_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P0_test_segments/segmentP0_L3_color_test.seg.nrrd -p ../resources/volumes/spine_P0_L3_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P0_test_segments/segmentP0_L3_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P0_L3_nocolor_256/plane0
+
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P1_test_segments/segmentP1_L1_color_test.seg.nrrd -p ../resources/volumes/spine_P1_L1_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P1_test_segments/segmentP1_L1_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P1_L1_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P1_test_segments/segmentP1_L2_color_test.seg.nrrd -p ../resources/volumes/spine_P1_L2_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P1_test_segments/segmentP1_L2_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P1_L2_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P1_test_segments/segmentP1_L3_color_test.seg.nrrd -p ../resources/volumes/spine_P1_L3_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P1_test_segments/segmentP1_L3_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P1_L3_nocolor_256/plane0
+
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P2_test_segments/segmentP2_L1_color_test.seg.nrrd -p ../resources/volumes/spine_P2_L1_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P2_test_segments/segmentP2_L1_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P2_L1_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P2_test_segments/segmentP2_L2_color_test.seg.nrrd -p ../resources/volumes/spine_P2_L2_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P2_test_segments/segmentP2_L2_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P2_L2_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P2_test_segments/segmentP2_L3_color_test.seg.nrrd -p ../resources/volumes/spine_P2_L3_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P2_test_segments/segmentP2_L3_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P2_L3_nocolor_256/plane0
+
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P4_test_segments/segmentP4_L1_color_test.seg.nrrd -p ../resources/volumes/spine_P4_L1_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P4_test_segments/segmentP4_L1_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P4_L1_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P4_test_segments/segmentP4_L2_color_test.seg.nrrd -p ../resources/volumes/spine_P4_L2_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P4_test_segments/segmentP4_L2_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P4_L2_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P4_test_segments/segmentP4_L3_color_test.seg.nrrd -p ../resources/volumes/spine_P4_L3_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P4_test_segments/segmentP4_L3_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P4_L3_nocolor_256/plane0
+
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L1_color_test.seg.nrrd -p ../resources/volumes/spine_P7_L1_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L1_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P7_L1_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L2_color_test.seg.nrrd -p ../resources/volumes/spine_P7_L2_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L2_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P7_L2_nocolor_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L3_color_test.seg.nrrd -p ../resources/volumes/spine_P7_L3_color_256/plane0
+python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L3_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P7_L3_nocolor_256/plane0
+
+
+
+
+
+

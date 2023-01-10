@@ -337,6 +337,10 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
     m_volumeObject->getShaderProgram()->setUniform("uL_46", L1_46);
     m_volumeObject->getShaderProgram()->setUniform("uL_5", L1_5);
 
+    cVector3d uUnit;
+    uUnit.set(m_drillManager.m_units_mmToSim, m_drillManager.m_units_mmToSim, m_drillManager.m_units_mmToSim);
+    m_volumeObject->getShaderProgram()->setUniform("uUnit", uUnit);
+
     static double last_time = 0.0;
 
     double dt = m_worldPtr->getWallTime() - last_time;
@@ -373,6 +377,7 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                     cColorb colorb;
                     m_voxelObj->m_texture->m_image->getVoxelColor(uint(ct.x()), uint(ct.y()), uint(ct.z()), colorb);
                     cColorf colorf = colorb.getColorf();
+                    colorf.setA(m_alpha);
                     m_drillManager.m_drillingPub->appendToVoxelMsg(ct, colorf);
                     m_voxelObj->m_texture->m_image->setVoxelColor(uint(ct.x()), uint(ct.y()), uint(ct.z()), m_zeroColor);
                     m_volumeUpdate.enclose(cVector3d(uint(ct.x()), uint(ct.y()), uint(ct.z())));
@@ -470,8 +475,15 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                 // cout << "Stored color:" << endl;
                 // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": " 
                 //<<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
-                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0)
+                
+                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 0.1 &&
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 0.1)
+                {
+                    m_alpha = 0.1;
+                }
+
+                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < red_thres &&
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < red_thres)
                 {
                     m_panelManager.setText(m_warningLabel,  warn_red);
                     m_panelManager.setVisible(m_warningLabel, true);
@@ -479,9 +491,16 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                     m_panelManager.setVisible(m_warningLabel_right, true);
                     m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
                     m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
+
+                    if(m_beepAudioSource && cond == 1){
+                        m_beepAudioSource->play();
+                        m_beepAudioSource->setPitch(1.5);
+                    }
+                    m_alpha = 0.2;
+                    
                 }
-                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0 ||
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0)
+                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < yellow_thres ||
+                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < yellow_thres)
                 {
                     m_panelManager.setVisible(m_warningLabel, true);
                     m_panelManager.setText(m_warningLabel, warn_yellow);
@@ -489,6 +508,18 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                     m_panelManager.setVisible(m_warningLabel_right, true);
                     m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0.6, 0., 1.0));
                     m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0.6, 0., 1.0));
+                    if(m_beepAudioSource && cond == 1){
+                        m_beepAudioSource->play();
+                        m_beepAudioSource->setPitch(1.0);
+                    }
+                    m_alpha = 0.3;
+                }
+                else{
+                    if(m_beepAudioSource && cond == 1){
+                        m_beepAudioSource->setPitch(1.0);
+                        m_beepAudioSource->stop();
+                    }
+                    m_alpha = 0.0;
                 }
             }
             // else {
@@ -502,30 +533,28 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         // Audio Playing
         //*************************
 
-        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim  < -1.0)
-        {
-            m_drillManager.setAudioPitch(1.2);
-        }
-        else
-        {
-            m_drillManager.setAudioPitch(1.0);
-        }
+        // if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim  < -1.0)
+        // {
+        //     m_drillManager.setAudioPitch(1.2);
+        // }
+        // else
+        // {
+        //     m_drillManager.setAudioPitch(1.0);
+        // }
 
+        // if (m_beepAudioSource && cond == 1)
+        // {
 
-
-        if (m_beepAudioSource && cond == 1)
-        {
-
-            if (min_distance < 1.0)
-            {
-                m_beepAudioSource->play();
-            }
-            else
-            {
-                m_beepAudioSource->stop();
-            }
+        //     if (min_distance < )
+        //     {
+        //         m_beepAudioSource->play();
+        //     }
+        //     else
+        //     {
+        //         m_beepAudioSource->stop();
+        //     }
         
-        }
+        // }
     }
     else {
         m_panelManager.setVisible(m_warningLabel, false);
@@ -1107,8 +1136,8 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
 
         else if (a_key == GLFW_KEY_B){
             if (m_footpedal.isAvailable()){
-                m_drillManager.m_isOn = !footpedal_pressed;
-                footpedal_pressed = !footpedal_pressed;
+                m_drillManager.m_isOn = true;
+                // footpedal_pressed = !footpedal_pressed;
             }
 
         }
