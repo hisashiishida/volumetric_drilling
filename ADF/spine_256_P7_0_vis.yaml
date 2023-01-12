@@ -10,7 +10,7 @@ namespace: /ambf/env/
 VOLUME mastoidectomy_volume:
   name: mastoidectomy_volume
   location:
-    position: {x: -5.35, y: 0.0, z: -0.2} 
+    position: {x: -3.35, y: 0.0, z: -0.2} 
     # position: {x: -5.35, y: 0.0, z: 0.0} 
     # position: {x: -5.35, y: 0.0, z: 0.2} 
     orientation: {r: 0, p: 0, y: 3.14}

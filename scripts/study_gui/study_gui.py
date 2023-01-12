@@ -113,7 +113,6 @@ class Ui(QtWidgets.QWidget):
         self._ambf_process.finished.connect(self._simulation_closed)
         self._pupil_process = QProcess()
         self._recording_process = QProcess()
-
         
 
         self.show()
@@ -181,6 +180,7 @@ class Ui(QtWidgets.QWidget):
         if button.text() == "L1":
             self.active_volume_adf = self.active_volume_adf + "_0"
             self.active_bone_segment = 'L1_minus_drilling'
+            
 
         elif button.text() == "L2":
             self.active_volume_adf = self.active_volume_adf + "_1"
@@ -189,6 +189,7 @@ class Ui(QtWidgets.QWidget):
         elif button.text() == "L3":
             self.active_volume_adf = self.active_volume_adf + "_2"
             self.active_bone_segment = 'L3_minus_drilling'
+
 
 
     def is_ready_to_record(self):

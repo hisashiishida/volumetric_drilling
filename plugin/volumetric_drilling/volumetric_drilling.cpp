@@ -520,6 +520,8 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                         m_beepAudioSource->stop();
                     }
                     m_alpha = 0.0;
+                    m_panelManager.setVisible(m_warningLabel, false);
+                    m_panelManager.setVisible(m_warningLabel_right, false);
                 }
             }
             // else {

@@ -12,7 +12,7 @@ VOLUME mastoidectomy_volume:
   location:
     # position: {x: -5.35, y: 0.0, z: -0.2} 
     # position: {x: -5.35, y: 0.0, z: 0.0} 
-    position: {x: -5.35, y: 0.0, z: 0.2} 
+    position: {x: -3.35, y: 0.0, z: 0.2} 
     orientation: {r: 0, p: 0, y: 3.14}
   scale: 1.0
   dimensions: {x: 0.5879, y: 0.617, z: 1.0} # Change the dimension according to the size and number of images
