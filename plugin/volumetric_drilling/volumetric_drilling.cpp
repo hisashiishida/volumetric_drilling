@@ -470,16 +470,16 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt)
                 // cout << "Stored color:" << endl;
                 // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": "
                 //<<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
-                if ((edt_list.list[0]->edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0)
-                    {
-                        m_panelManager.setText(m_warningLabel, warn_red);
-                        m_panelManager.setVisible(m_warningLabel, true);
-                        m_panelManager.setText(m_warningLabel_right, warn_red);
-                        m_panelManager.setVisible(m_warningLabel_right, true);
-                        m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
-                        m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
-                    }
+                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
+                    (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0)
+                {
+                    m_panelManager.setText(m_warningLabel, warn_red);
+                    m_panelManager.setVisible(m_warningLabel, true);
+                    m_panelManager.setText(m_warningLabel_right, warn_red);
+                    m_panelManager.setVisible(m_warningLabel_right, true);
+                    m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
+                    m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
+                }
                 else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0 ||
                          (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0)
                 {

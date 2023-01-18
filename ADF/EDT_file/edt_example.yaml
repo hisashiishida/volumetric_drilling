@@ -17,15 +17,13 @@ anatomies: [
   
 edt root: ../resources/edt_grids/RT143_256
 
-STRUCT IAC:
+IAC:
   name: IAC
   edt path: IAC.edt
   color: {r: 244, g: 142, b: 52, a: 255}
   force threshold: 1.0
   audio threshold: 1.0
 
-
-  # Save this for future use.
   shaders:
     path: IAC_256/
     prefix: edtplane00
