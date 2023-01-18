@@ -22,8 +22,13 @@ def create_colorEdtimage(input, output):
     img_new = np.array(img_new)
     print(img_new.shape)
 
+    cut_off = 50
     for x in range(img.shape[0]):
         for y in range(img.shape[1]):
+            if (img[x][y][0] < cut_off):
+                img_new[x][y] = img[x][y][0]
+            else:
+                img_new[x][y] = cut_off
             img_new[x][y] = img[x][y][0]
 
     ax = plt.subplot()
@@ -34,7 +39,7 @@ def create_colorEdtimage(input, output):
     cax = divider.append_axes("right", size="5%", pad=0.05)
 
     pcm = ax.pcolor(img_new ,norm=colors.PowerNorm(gamma=0.5),
-                    shading='auto', cmap='hsv')
+                    shading='auto', cmap='YlGnBu')
     plt.colorbar(pcm, cax=cax, extend='max')
 
     # plt.colorbar(im, cax=cax)

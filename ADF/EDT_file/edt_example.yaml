@@ -1,0 +1,131 @@
+anatomies: [
+  IAC, 
+  Sinus_+_Dura, 
+  TMJ, 
+  ICA, 
+  Malleus, 
+  Incus, 
+  Stapes,
+  Bony_Labyrinth,
+  Superior_Vestibular_Nerve,
+  Inferior_Vestibular_Nerve,
+  Cochlear_Nerve,
+  Facial_Nerve,
+  Chorda_Tympani,
+  Vestibular_Aqueduct,
+  EAC]
+  
+edt root: ../resources/edt_grids/RT143_256
+
+STRUCT IAC:
+  name: IAC
+  edt path: IAC.edt
+  color: {r: 244, g: 142, b: 52, a: 255}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+
+  # Save this for future use.
+  shaders:
+    path: IAC_256/
+    prefix: edtplane00
+    format: png
+    count: 512
+
+STRUCT Sinus_+_Dura:
+  name: Sinus_+_Dura
+  edt path: Sinus_+_Dura.edt
+  color: {r: 110, g: 184, b: 209}
+  force threshold: 0.25
+  audio threshold: 0.5
+
+STRUCT TMJ:
+  name: TMJ
+  edt path: TMJ.edt
+  color: {r: 100, g: 0, b: 0}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+STRUCT EAC:
+  name: EAC
+  edt path: EAC.edt
+  color: {r: 255, g: 225, b: 214}
+  force threshold: 0.25
+  audio threshold: 0.5
+
+STRUCT Malleus:
+  name: Malleus
+  edt path: Malleus.edt
+  color: {r: 233, g: 0, b: 255}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+STRUCT Incus:
+  name: Incus
+  edt path: Incus.edt
+  color: {r: 0, g: 255, b: 149}
+  force threshold: 0.25
+  audio threshold: 0.5
+
+STRUCT Stapes:
+  name: Stapes
+  edt path: Stapes.edt
+  color: {r: 63, g: 0, b: 255}
+  force threshold: 0.5
+  audio threshold: 1.0
+
+STRUCT Bony_Labyrinth:
+  name: Bony_Labyrinth
+  edt path: Bony_Labyrinth.edt
+  color: {r: 91, g: 123, b: 91}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+STRUCT ICA:
+  name: ICA
+  edt path: ICA.edt
+  color: {r: 216, g: 100, b: 79}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+STRUCT Superior_Vestibular_Nerve:
+  name: Superior_Vestibular_Nerve
+  edt path: Superior_Vestibular_Nerve.edt
+  color: {r: 255, g: 191, b: 135}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+STRUCT Inferior_Vestibular_Nerve:
+  name: Inferior_Vestibular_Nerve
+  edt path: Inferior_Vestibular_Nerve.edt
+  color: {r: 121, g: 70, b: 24}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+STRUCT Cochlear_Nerve:
+  name: Cochlear_Nerve
+  edt path: Cochlear_Nerve.edt
+  color: {r: 219, g: 244, b: 52}
+  force threshold: 1.0
+  audio threshold: 1.0
+
+STRUCT Facial_Nerve:
+  name: Facial_Nerve
+  edt path: Facial_Nerve.edt
+  color: {r: 244, g: 214, b: 49}
+  force threshold: 0.1
+  audio threshold: 0.25
+
+STRUCT Chorda_Tympani:
+  name: Chorda_Tympani
+  edt path: Chorda_Tympani.edt
+  color: {r: 151, g: 131, b: 29}
+  force threshold: 0.1
+  audio threshold: 0.25
+
+STRUCT Vestibular_Aqueduct:
+  name: Vestibular_Aqueduct
+  edt path: Vestibular_Aqueduct.edt
+  color: {r: 91, g: 98, b: 123}
+  force threshold: 1.0
+  audio threshold: 1.0

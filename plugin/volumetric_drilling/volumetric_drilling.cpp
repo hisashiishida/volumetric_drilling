@@ -48,7 +48,6 @@
 
 using namespace std;
 
-
 //------------------------------------------------------------------------------
 // DECLARED FUNCTIONS
 //------------------------------------------------------------------------------
@@ -56,36 +55,22 @@ using namespace std;
 //------------------------------------------------------------------------------
 namespace p_opt = boost::program_options;
 
-
-afVolmetricDrillingPlugin::afVolmetricDrillingPlugin(){
-
+afVolmetricDrillingPlugin::afVolmetricDrillingPlugin()
+{
 }
 
-int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_afWorld){
+int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_afWorld)
+{
     p_opt::options_description cmd_opts("drilling_simulator Command Line Options");
-    cmd_opts.add_options()
-            ("info", "Show Info")
-            ("nt", p_opt::value<int>()->default_value(8), "Number Tool Cursors to Load. Default 8")
-            ("ds", p_opt::value<float>()->default_value(0.026), "Offset between shaft tool cursors. Default 0.026")
-            ("vm", p_opt::value<string>()->default_value("00ShinyWhite.jpg"), "Volume's Matcap Filename (Should be placed in the ./resources/matcap/ folder)")
-            ("dm", p_opt::value<string>()->default_value("dark_metal_brushed.jpg"), "Drill's Matcap Filename (Should be placed in ./resources/matcap/ folder)")
-            ("fp", p_opt::value<string>()->default_value("/dev/input/js0"), "Footpedal joystick input file description E.g. /dev/input/js0)")
-            ("mute", p_opt::value<bool>()->default_value(false), "Mute")
-            ("gcdr", p_opt::value<double>()->default_value(30.0), "Gaze Calibration Marker Motion Duration")
-            ("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256"), "EDT root directory")
-            ("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")
-            ("bone", p_opt::value<string>()->default_value("L1_minus_drilling"), "Bone edt (ex. L1_minus_drilling)")
-            ("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcture name and resolution")
-            ("unit", p_opt::value<double>()->default_value(0.0), "mm to simulation unit")
-            ("spacial_resolution", p_opt::value<double>()->default_value(0.48), "mm to simulation unit");
-
+    cmd_opts.add_options()("info", "Show Info")("nt", p_opt::value<int>()->default_value(8), "Number Tool Cursors to Load. Default 8")("ds", p_opt::value<float>()->default_value(0.026), "Offset between shaft tool cursors. Default 0.026")("vm", p_opt::value<string>()->default_value("00ShinyWhite.jpg"), "Volume's Matcap Filename (Should be placed in the ./resources/matcap/ folder)")("dm", p_opt::value<string>()->default_value("dark_metal_brushed.jpg"), "Drill's Matcap Filename (Should be placed in ./resources/matcap/ folder)")("fp", p_opt::value<string>()->default_value("/dev/input/js0"), "Footpedal joystick input file description E.g. /dev/input/js0)")("mute", p_opt::value<bool>()->default_value(false), "Mute")("gcdr", p_opt::value<double>()->default_value(30.0), "Gaze Calibration Marker Motion Duration")("edt", p_opt::value<string>()->default_value("/resources/edt_grids/spine_P0_256"), "EDT root directory")("condition", p_opt::value<int>()->default_value(0), "Condtions,1: Baseline, 2: Visual only, 3: Audio only, 4: Force only, 5: All assistance")("bone", p_opt::value<string>()->default_value("L1_minus_drilling"), "Bone edt (ex. L1_minus_drilling)")("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcture name and resolution")("unit", p_opt::value<double>()->default_value(0.0), "mm to simulation unit")("spacial_resolution", p_opt::value<double>()->default_value(0.48), "mm to simulation unit");
 
     p_opt::variables_map var_map;
     p_opt::store(p_opt::command_line_parser(argc, argv).options(cmd_opts).allow_unregistered().run(), var_map);
     p_opt::notify(var_map);
 
-    if(var_map.count("info")){
-        std::cout<< cmd_opts << std::endl;
+    if (var_map.count("info"))
+    {
+        std::cout << cmd_opts << std::endl;
         return -1;
     }
 
@@ -99,7 +84,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     string edt_root = var_map["edt"].as<string>();
     string sdf_path = var_map["sdf"].as<string>();
     string bone_edt_name = var_map["bone"].as<string>();
-    
+
     cond = var_map["condition"].as<int>();
     double unit = var_map["unit"].as<double>();
     space_res = var_map["spacial_resolution"].as<double>();
@@ -118,36 +103,44 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     m_cameraR = findAndAppendCamera("cameraR");
     m_stereoCamera = findAndAppendCamera("stereoLR");
 
-    if (m_cameras.size() == 0){
+    if (m_cameras.size() == 0)
+    {
         cerr << "ERROR! NO CAMERAS FOUND. " << endl;
         return -1;
     }
 
-    if (!m_mainCamera){
+    if (!m_mainCamera)
+    {
         cerr << "INFO! FAILED TO LOAD main_camera, taking the first camera from world " << endl;
         m_mainCamera = m_worldPtr->getCameras()[0];
     }
 
-    if (m_stereoCamera){
+    if (m_stereoCamera)
+    {
         makeVRWindowFullscreen(m_stereoCamera);
     }
 
     m_panelManager.addCamera(m_mainCamera);
-    if (m_stereoCamera){
+    if (m_stereoCamera)
+    {
         m_stereoCamera->getInternalCamera()->m_stereoOffsetW = 0.1;
         m_panelManager.addCamera(m_stereoCamera);
     }
 
-    if (!m_drillManager.init(a_afWorld, &m_panelManager, var_map)){
+    if (!m_drillManager.init(a_afWorld, &m_panelManager, var_map))
+    {
         return -1;
     }
 
     m_volumeObject = m_worldPtr->getVolume("mastoidectomy_volume");
-    if (!m_volumeObject){
-        cerr << "ERROR! FAILED TO FIND VOLUME NAMED " << "mastoidectomy_volume" << endl;
+    if (!m_volumeObject)
+    {
+        cerr << "ERROR! FAILED TO FIND VOLUME NAMED "
+             << "mastoidectomy_volume" << endl;
         return -1;
     }
-    else{
+    else
+    {
         m_voxelObj = m_volumeObject->getInternalVolume();
 
         m_maxVolCorner = m_voxelObj->m_maxCorner;
@@ -168,7 +161,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     double maxStiffness = m_drillManager.m_hapticDevice->getSpecifications().m_maxLinearStiffness / workspaceScaleFactor;
 
     // Set voxels surface contact properties
-    m_voxelObj->m_material->setStiffness(2.0*maxStiffness);
+    m_voxelObj->m_material->setStiffness(2.0 * maxStiffness);
     m_voxelObj->m_material->setDamping(0.0);
     m_voxelObj->m_material->setDynamicFriction(0.0);
     m_voxelObj->setUseMaterial(true);
@@ -184,12 +177,14 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
 
     string volumeMatcapFilepath = current_filepath + "/../../resources/matcap/" + volume_matcap;
     cTexture2dPtr volMatCap = cTexture2d::create();
-    if(volMatCap->loadFromFile(volumeMatcapFilepath)){
+    if (volMatCap->loadFromFile(volumeMatcapFilepath))
+    {
         m_volumeObject->getInternalVolume()->m_aoTexture = volMatCap;
         m_volumeObject->getInternalVolume()->m_aoTexture->setTextureUnit(GL_TEXTURE5);
         cerr << "SUCCESFULLY LOADED VOLUME'S MATCAP TEXTURE" << endl;
     }
-    else{
+    else
+    {
         cerr << "FAILED TO LOAD VOLUME'S MATCAP TEXTURE" << endl;
     }
 
@@ -202,8 +197,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
 
     string sdfPath = current_filepath + "/" + edt_root + sdf_path + "/edtplane_";
     string sdfPath1 = current_filepath + "/" + edt_root + bone_edt_name + "_256" + "/edtplane_";
-    
-    
+
     cerr << "SDF path: " << sdfPath << endl;
     cerr << "SDF path1: " << sdfPath1 << endl;
 
@@ -212,8 +206,9 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
 
     cout << "# of sdfimages in SDF path: " << num_sdfimages << endl;
     cout << "# of sdfimages in SDF path1: " << num_sdfimages1 << endl;
-    
-    if(num_sdfimages > 0){
+
+    if (num_sdfimages > 0)
+    {
         sdfTex->setImage(sdfImages);
         sdfTex1->setImage(sdfImages1);
         m_volumeObject->getInternalVolume()->m_metallicTexture = sdfTex;
@@ -222,9 +217,9 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
         m_volumeObject->getInternalVolume()->m_roughnessTexture->setTextureUnit(GL_TEXTURE4);
 
         cerr << "FOUND SDF TEXTURE" << endl;
-
     }
-    else{
+    else
+    {
         cerr << "FAILED TO FOUND SDF TEXTURE" << endl;
     }
 
@@ -232,7 +227,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     // EDT Loading
     //*******************
     edt_root = current_filepath + "/" + edt_root;
-    cout << "EDT path: " << edt_root<< endl;
+    cout << "EDT path: " << edt_root << endl;
     this->edt_list.print_info();
     this->edt_list.load_all_grids(edt_root);
 
@@ -247,8 +242,6 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     // printf("%s: (%d %d %d)\n", this->edt_list.list[0].name.c_str(),
     //        this->edt_list.list[0].rgb[0], this->edt_list.list[0].rgb[1], this->edt_list.list[0].rgb[2]);
     // printf("resolution: %d %d %d\n", res[0], res[1], res[2]);
-
-
 
     //*******************
     // BeeP Audio Loading
@@ -276,24 +269,25 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     //************************
     // Unit for the simulator
     //*************************
-     if (unit != 0.0){
+    if (unit != 0.0)
+    {
         m_drillManager.setunit(unit);
-        cout << "UNIT SET AS:" << unit << endl;        
+        cout << "UNIT SET AS:" << unit << endl;
     }
 
-
-
-    cBackground* background = new cBackground();
+    cBackground *background = new cBackground();
     background->setCornerColors(cColorf(1.0f, 1.0f, 1.0f),
                                 cColorf(1.0f, 1.0f, 1.0f),
                                 cColorf(0.6f, 0.6f, 0.6f),
                                 cColorf(0.6f, 0.6f, 0.6f));
     m_mainCamera->getBackLayer()->addChild(background);
 
-    if (m_footpedal.init(footpedal_fd) != -1){
+    if (m_footpedal.init(footpedal_fd) != -1)
+    {
         cerr << "INFO! FOUND FOOTPEDAL INTERFACE \n";
     }
-    else{
+    else
+    {
         cerr << "WARNING! NO FOOTPEDAL INTERFACE FOUND \n";
     }
 
@@ -302,7 +296,8 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     return 1;
 }
 
-void afVolmetricDrillingPlugin::graphicsUpdate(){
+void afVolmetricDrillingPlugin::graphicsUpdate()
+{
 
     // update region of voxels to be updated
     if (m_flagMarkVolumeForUpdate)
@@ -312,25 +307,24 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
         cVector3d max = m_volumeUpdate.m_max;
         m_volumeUpdate.setEmpty();
         m_mutexVoxel.release();
-        ((cTexture3d*)m_voxelObj->m_texture.get())->markForPartialUpdate(min, max);
+        ((cTexture3d *)m_voxelObj->m_texture.get())->markForPartialUpdate(min, max);
         m_flagMarkVolumeForUpdate = false;
     }
     m_volumeObject->getShaderProgram()->setUniformi("uMatcapMap", C_TU_AO);
     m_volumeObject->getShaderProgram()->setUniformi("shadowMap", C_TU_SHADOWMAP);
-
 
     //Added for SDF based textures
     m_volumeObject->getShaderProgram()->setUniformi("sdfVolume", C_TU_METALLIC);
     m_volumeObject->getShaderProgram()->setUniformi("sdfVolume1", C_TU_ROUGHNESS);
 
     cVector3d L1_13;
-    L1_13.set(0.5 *0.4117, 0.5 *0.8039, 0.5 *0.4902);
+    L1_13.set(0.5 * 0.4117, 0.5 * 0.8039, 0.5 * 0.4902);
     cVector3d L1_2;
-    L1_2.set(0.5 *0.4353, 0.5 *0.7216, 0.5 *0.8235);
+    L1_2.set(0.5 * 0.4353, 0.5 * 0.7216, 0.5 * 0.8235);
     cVector3d L1_46;
-    L1_46.set(0.5 *0.4313, 0.5 *0.7843, 0.5 *0.4705);
+    L1_46.set(0.5 * 0.4313, 0.5 * 0.7843, 0.5 * 0.4705);
     cVector3d L1_5;
-    L1_5.set(0.5 *0.4941, 0.5 *0.6314, 0.5 *0.7725);
+    L1_5.set(0.5 * 0.4941, 0.5 * 0.6314, 0.5 * 0.7725);
 
     m_volumeObject->getShaderProgram()->setUniform("uL_13", L1_13);
     m_volumeObject->getShaderProgram()->setUniform("uL_2", L1_2);
@@ -347,7 +341,8 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
     m_panelManager.update();
 }
 
-void afVolmetricDrillingPlugin::physicsUpdate(double dt){
+void afVolmetricDrillingPlugin::physicsUpdate(double dt)
+{
 
     m_worldPtr->getChaiWorld()->computeGlobalPositions(true);
 
@@ -357,18 +352,21 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     {
 
         // retrieve contact event
-        cCollisionEvent* contact = m_drillManager.m_toolCursorList[0]->m_hapticPoint->getCollisionEvent(0);
+        cCollisionEvent *contact = m_drillManager.m_toolCursorList[0]->m_hapticPoint->getCollisionEvent(0);
 
         cVector3d orig(contact->m_voxelIndexX, contact->m_voxelIndexY, contact->m_voxelIndexZ); // This is the closest voxel index to the drill tip
 
         m_voxelObj->m_texture->m_image->getVoxelColor(uint(orig.x()), uint(orig.y()), uint(orig.z()), m_storedColor);
 
-        if (m_storedColor != m_zeroColor){
-            if (m_drillManager.m_isOn){
+        if (m_storedColor != m_zeroColor)
+        {
+            if (m_drillManager.m_isOn)
+            {
                 int removalCount = cMin(m_drillManager.m_activeDrill->getVoxelRemovalThreshold(), (int)contact->m_events.size());
                 m_drillManager.m_drillingPub->clearVoxelMsg();
                 m_mutexVoxel.acquire();
-                for (int cIdx = 0 ; cIdx < removalCount ; cIdx++){
+                for (int cIdx = 0; cIdx < removalCount; cIdx++)
+                {
                     cVector3d ct(contact->m_events[cIdx].m_voxelIndexX, contact->m_events[cIdx].m_voxelIndexY, contact->m_events[cIdx].m_voxelIndexZ);
                     cColorb colorb;
                     m_voxelObj->m_texture->m_image->getVoxelColor(uint(ct.x()), uint(ct.y()), uint(ct.z()), colorb);
@@ -414,9 +412,9 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         unsigned int res[3];
         edt_list.list[0].get_resolution(res);
         // Frame Tramsformation from Anatomy frame to SDF index frame
-        index_x =  round((voxel_T_tool.getLocalPos().x() + 0.5 * dims[0]) / dims[0] * res[0]);
+        index_x = round((voxel_T_tool.getLocalPos().x() + 0.5 * dims[0]) / dims[0] * res[0]);
         index_y = -round((voxel_T_tool.getLocalPos().y() - 0.5 * dims[1]) / dims[1] * res[1]);
-        index_z =  round((voxel_T_tool.getLocalPos().z() + 0.5 * dims[2]) / dims[2] * res[2]);
+        index_z = round((voxel_T_tool.getLocalPos().z() + 0.5 * dims[2]) / dims[2] * res[2]);
 
         std::string min_name = "XXX";
         min_distance = 1000;
@@ -443,45 +441,47 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         m_panelManager.setText(m_distanceLabel_right, cStr(min_distance) + " mm");
         m_panelManager.setVisible(m_distanceLabel_right, false);
 
-
         // m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
         m_L1_13_Color = cColorb(105, 205, 125, 255); //0.4117, 0.8039, 0.4902
-        m_L1_2_Color  = cColorb(111, 184, 210, 255); //0.4353, 0.7216, 0.8235
+        m_L1_2_Color = cColorb(111, 184, 210, 255);  //0.4353, 0.7216, 0.8235
         m_L1_46_Color = cColorb(110, 200, 120, 255); //0.4313, 0.7843, 0.4705
-        m_L1_5_Color  = cColorb(126, 161, 197, 255); //0.4941, 0.6314, 0.7725
+        m_L1_5_Color = cColorb(126, 161, 197, 255);  //0.4941, 0.6314, 0.7725
 
         string warn_red;
         string warn_yellow;
-        if (cond != 0){
+        if (cond != 0)
+        {
 
-            if (cond == 1){
-            warn_red = "Delicate anatomy breached!!";
-            warn_yellow = "[Caution] 1mm to delicate anatomy";
+            if (cond == 1)
+            {
+                warn_red = "Delicate anatomy breached!!";
+                warn_yellow = "[Caution] 1mm to delicate anatomy";
             }
-           
-            else if (cond==2){
+
+            else if (cond == 2)
+            {
                 warn_red = "Red region breached!!";
                 warn_yellow = "[Caution] Yellow region breached";
             }
 
-            if(m_storedColor != m_boneColor && m_storedColor != m_zeroColor)
-            {   
+            if (m_storedColor != m_boneColor && m_storedColor != m_zeroColor)
+            {
                 // cout << (m_storedColor == m_L1_13_Color) << ": " <<(m_storedColor == m_L1_2_Color) << ": " <<(m_storedColor == m_L1_46_Color) << ": " <<(m_storedColor == m_L1_5_Color) << endl;
                 // cout << "Stored color:" << endl;
-                // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": " 
+                // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": "
                 //<<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
-                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
+                if ((edt_list.list[0]->edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0 &&
                 (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 1.0)
-                {
-                    m_panelManager.setText(m_warningLabel,  warn_red);
-                    m_panelManager.setVisible(m_warningLabel, true);
-                    m_panelManager.setText(m_warningLabel_right,  warn_red);
-                    m_panelManager.setVisible(m_warningLabel_right, true);
-                    m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
-                    m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
-                }
+                    {
+                        m_panelManager.setText(m_warningLabel, warn_red);
+                        m_panelManager.setVisible(m_warningLabel, true);
+                        m_panelManager.setText(m_warningLabel_right, warn_red);
+                        m_panelManager.setVisible(m_warningLabel_right, true);
+                        m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
+                        m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
+                    }
                 else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0 ||
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0)
+                         (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 4.0)
                 {
                     m_panelManager.setVisible(m_warningLabel, true);
                     m_panelManager.setText(m_warningLabel, warn_yellow);
@@ -494,15 +494,14 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
             // else {
             // m_panelManager.setVisible(m_warningLabel, false);
             // m_panelManager.setVisible(m_warningLabel_right, false);
-            // }               
+            // }
         }
-        
-        
+
         //*************************
         // Audio Playing
         //*************************
 
-        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim  < -1.0)
+        if ((*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < -1.0)
         {
             m_drillManager.setAudioPitch(1.2);
         }
@@ -510,8 +509,6 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
         {
             m_drillManager.setAudioPitch(1.0);
         }
-
-
 
         if (m_beepAudioSource && cond == 1)
         {
@@ -524,35 +521,34 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
             {
                 m_beepAudioSource->stop();
             }
-        
         }
     }
-    else {
+    else
+    {
         m_panelManager.setVisible(m_warningLabel, false);
         m_panelManager.setVisible(m_distanceLabel, false);
         m_panelManager.setVisible(m_warningLabel_right, false);
         m_panelManager.setVisible(m_distanceLabel_right, false);
     }
 
-
     double force_offset = 0.2;
     double max_force_offset = 2.0;
     double thres = 2.0;
 
-    if (min_distance < thres && min_distance > 0){
+    if (min_distance < thres && min_distance > 0)
+    {
         removal_val = m_drillManager.m_activeDrill->getVoxelRemovalThreshold();
-        int val = cMax(1, int(removal_val - int((thres - min_distance)/thres)));
+        int val = cMax(1, int(removal_val - int((thres - min_distance) / thres)));
         m_drillManager.m_activeDrill->setVoxelRemvalThreshold(val);
     }
-    else {
+    else
+    {
         m_drillManager.m_activeDrill->setVoxelRemvalThreshold(removal_val);
     }
 
-
-
-
     // compute interaction forces
-    for(int i = 0 ; i < m_drillManager.m_toolCursorList.size() ; i++){
+    for (int i = 0; i < m_drillManager.m_toolCursorList.size(); i++)
+    {
         m_drillManager.m_toolCursorList[i]->computeInteractionForces();
     }
 
@@ -561,10 +557,11 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     // cVector3d force = cVector3d(force_offset, force_offset, force_offset) * cTranspose(m_mainCamera->getLocalRot()) * m_drillManager.m_targetToolCursor->getDeviceLocalForce();
     cVector3d force_dir = m_drillManager.m_targetToolCursor->getDeviceLocalForce();
     force_dir.normalize();
-    
+
     cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce() + force_dir * force_offset);
     // cVector3d force = cTranspose(m_mainCamera->getLocalRot()) * (m_drillManager.m_targetToolCursor->getDeviceLocalForce());
-    if (m_drillManager.m_isOn){
+    if (m_drillManager.m_isOn)
+    {
         force += (cVector3d(1.0, 1.0, 1.0) * m_waveGenerator.generate(dt));
     }
     m_drillManager.m_toolCursorList[0]->setDeviceLocalForce(force);
@@ -599,36 +596,40 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
     /////////////////////////////////////////////////////////////////////////
 
     // send forces to haptic device
-    if (m_drillManager.getOverrideControl() == false){
+    if (m_drillManager.getOverrideControl() == false)
+    {
         m_drillManager.m_toolCursorList[0]->applyToDevice();
     }
-
 }
-
-
 
 void afVolmetricDrillingPlugin::sliceVolume(int axisIdx, double delta)
 {
     string axis_str = "";
-    if (axisIdx == 0){
+    if (axisIdx == 0)
+    {
         axis_str = "X";
     }
-    else if (axisIdx == 1){
+    else if (axisIdx == 1)
+    {
         axis_str = "Y";
     }
-    else if (axisIdx == 2){
+    else if (axisIdx == 2)
+    {
         axis_str = "Z";
     }
-    else{
+    else
+    {
         cerr << "ERROR! Volume axis index should be either 0, 1 or 2" << endl;
         return;
     }
 
     string delta_dir_str = "";
-    if (delta > 0){
+    if (delta > 0)
+    {
         delta_dir_str = "Increase";
     }
-    else{
+    else
+    {
         delta_dir_str = "Decrease";
     }
 
@@ -641,47 +642,50 @@ void afVolmetricDrillingPlugin::sliceVolume(int axisIdx, double delta)
     cerr << "> " << delta_dir_str << " Volume size along " << axis_str << " axis.                            \r";
 }
 
-
 void afVolmetricDrillingPlugin::makeVRWindowFullscreen(afCameraPtr vrCam, int monitor_number)
 {
     int count;
-    GLFWmonitor** monitors = glfwGetMonitors(&count);
+    GLFWmonitor **monitors = glfwGetMonitors(&count);
 
-    if (monitor_number >= 0){
-        if (monitor_number >= count){
-            cerr << "WARNING! SPECIFIED MONITOR NUMBER " << monitor_number <<
-                    " FOR VR IS GREATER THAN NUMBER OF DISPLAYS. IGNORING" << endl;
+    if (monitor_number >= 0)
+    {
+        if (monitor_number >= count)
+        {
+            cerr << "WARNING! SPECIFIED MONITOR NUMBER " << monitor_number << " FOR VR IS GREATER THAN NUMBER OF DISPLAYS. IGNORING" << endl;
             return;
         }
         vrCam->m_monitor = monitors[monitor_number];
     }
 
-    for (int cnt = 0 ; cnt < count ; cnt++){
+    for (int cnt = 0; cnt < count; cnt++)
+    {
         string monitor_name = glfwGetMonitorName(monitors[cnt]);
         cerr << "\t Monitor Number: " << cnt << " | Name: " << monitor_name << endl;
     }
 
-
-    const GLFWvidmode* mode = glfwGetVideoMode(vrCam->m_monitor);
+    const GLFWvidmode *mode = glfwGetVideoMode(vrCam->m_monitor);
     int w = 0.9 * mode->width;
     int h = 0.9 * mode->height;
     int x = 0.7 * (mode->width - w);
     int y = 0.7 * (mode->height - h);
     int xpos, ypos;
     glfwGetMonitorPos(vrCam->m_monitor, &xpos, &ypos);
-    x += xpos; y += ypos;
+    x += xpos;
+    y += ypos;
     glfwSetWindowPos(vrCam->m_window, x, y);
     glfwSetWindowSize(vrCam->m_window, w, h);
     vrCam->m_width = w;
     vrCam->m_height = h;
     glfwSwapInterval(0);
-    cerr << "\t\t Setting the Window on the VR Monitor to fullscreen \n" ;
+    cerr << "\t\t Setting the Window on the VR Monitor to fullscreen \n";
 }
 
-void afVolmetricDrillingPlugin::updateButtons(){
+void afVolmetricDrillingPlugin::updateButtons()
+{
     m_footpedal.poll();
 
-    if (m_footpedal.isChangeBurrSizePressed()){
+    if (m_footpedal.isChangeBurrSizePressed())
+    {
         m_drillManager.cycleDrillTypes();
     }
 
@@ -690,13 +694,14 @@ void afVolmetricDrillingPlugin::updateButtons(){
     m_drillManager.m_camClutch = false;
     m_drillManager.m_deviceClutch = false;
 
-    if (m_footpedal.isAvailable()){
+    if (m_footpedal.isAvailable())
+    {
         m_drillManager.m_camClutch = m_footpedal.isCamClutchPressed();
         m_drillManager.m_deviceClutch = m_footpedal.isDeviceClutchPressed();
-
     }
 
-    if (m_drillManager.m_hapticDevice->isDeviceAvailable()){
+    if (m_drillManager.m_hapticDevice->isDeviceAvailable())
+    {
         bool val1, val2;
         m_drillManager.m_hapticDevice->getUserSwitch(1, val1);
         m_drillManager.m_hapticDevice->getUserSwitch(0, val2);
@@ -706,13 +711,16 @@ void afVolmetricDrillingPlugin::updateButtons(){
     }
 }
 
-afCameraPtr afVolmetricDrillingPlugin::findAndAppendCamera(string cam_name){
+afCameraPtr afVolmetricDrillingPlugin::findAndAppendCamera(string cam_name)
+{
     afCameraPtr cam = m_worldPtr->getCamera(cam_name);
-    if (cam){
+    if (cam)
+    {
         cerr << "INFO! GOT CAMERA: " << cam->getName() << endl;
         m_cameras[cam_name] = cam;
     }
-    else{
+    else
+    {
         cerr << "WARNING! CAMERA NOT FOUND " << cam_name << endl;
     }
     return cam;
@@ -743,8 +751,6 @@ void afVolmetricDrillingPlugin::initializeLabels()
     m_panelManager.addPanel(m_warningLabel_right, 0.7, 0.5, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
     m_panelManager.setVisible(m_warningLabel_right, false);
 
-
-
     m_volumeSmoothingLabel = new cLabel(font);
     m_volumeSmoothingLabel->m_fontColor.setRed();
     m_volumeSmoothingLabel->setFontScale(.5);
@@ -770,71 +776,75 @@ void afVolmetricDrillingPlugin::initializeLabels()
     m_distanceLabel_right->setColor(cColorf(1.0, 1., 1., 1.0));
 
     m_panelManager.addPanel(m_distanceLabel_right, 0.65, 0.6, PanelReferenceOrigin::CENTER, PanelReferenceType::NORMALIZED);
-    
-
-
 }
 
-
-void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, int a_scancode, int a_action, int a_mods) {
-    if (a_mods == GLFW_MOD_CONTROL){
+void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, int a_scancode, int a_action, int a_mods)
+{
+    if (a_mods == GLFW_MOD_CONTROL)
+    {
 
         double rate = m_drillManager.m_drillRate;
         // controls linear motion of tool
-        if (a_key == GLFW_KEY_W) {
+        if (a_key == GLFW_KEY_W)
+        {
 
             cVector3d dir = m_mainCamera->getUpVector() * rate;
             m_drillManager.incrementDevicePos(dir);
         }
 
-        else if (a_key == GLFW_KEY_D) {
+        else if (a_key == GLFW_KEY_D)
+        {
 
             cVector3d dir = m_mainCamera->getRightVector() * rate;
             m_drillManager.incrementDevicePos(dir);
-
         }
 
-        else if (a_key == GLFW_KEY_S) {
+        else if (a_key == GLFW_KEY_S)
+        {
 
             cVector3d dir = m_mainCamera->getUpVector() * rate;
             m_drillManager.incrementDevicePos(-dir);
-
         }
 
-        else if (a_key == GLFW_KEY_A) {
+        else if (a_key == GLFW_KEY_A)
+        {
 
             cVector3d dir = m_mainCamera->getRightVector() * rate;
             m_drillManager.incrementDevicePos(-dir);
-
         }
 
-        else if (a_key == GLFW_KEY_K) {
+        else if (a_key == GLFW_KEY_K)
+        {
 
             cVector3d dir = m_mainCamera->getLookVector() * rate;
             m_drillManager.incrementDevicePos(-dir);
-
         }
 
-        else if (a_key == GLFW_KEY_I) {
+        else if (a_key == GLFW_KEY_I)
+        {
 
             cVector3d dir = m_mainCamera->getLookVector() * rate;
             m_drillManager.incrementDevicePos(dir);
         }
 
-        else if (a_key == GLFW_KEY_O) {
+        else if (a_key == GLFW_KEY_O)
+        {
 
             m_drillManager.setOverrideControl(!m_drillManager.getOverrideControl());
         }
 
-        else if (a_key == GLFW_KEY_C) {
+        else if (a_key == GLFW_KEY_C)
+        {
             m_drillManager.m_showGoalProxySpheres = !m_drillManager.m_showGoalProxySpheres;
-            for (int i = 0 ; i < m_drillManager.m_toolCursorList.size() ; i++){
+            for (int i = 0; i < m_drillManager.m_toolCursorList.size(); i++)
+            {
                 m_drillManager.m_toolCursorList[i]->m_hapticPoint->setShow(m_drillManager.m_showGoalProxySpheres, m_drillManager.m_showGoalProxySpheres);
             }
         }
 
         // option - polygonize model and save to file
-        else if (a_key == GLFW_KEY_P) {
+        else if (a_key == GLFW_KEY_P)
+        {
             cMultiMesh *surface = new cMultiMesh;
             m_voxelObj->polygonize(surface, 0.01, 0.01, 0.01);
             double SCALE = 0.1;
@@ -847,71 +857,82 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         }
 
         // toggles size of drill burr/tip tool cursor
-        else if (a_key == GLFW_KEY_N){
+        else if (a_key == GLFW_KEY_N)
+        {
             cerr << "INFO! RESETTING THE VOLUME" << endl;
             m_volumeObject->reset();
         }
 
-        else if (a_key == GLFW_KEY_G){
+        else if (a_key == GLFW_KEY_G)
+        {
             m_gazeMarkerController.restart();
         }
 
-        else if (a_key == GLFW_KEY_E){
+        else if (a_key == GLFW_KEY_E)
+        {
             static int enableShadow = 0;
-            enableShadow = ! enableShadow;
+            enableShadow = !enableShadow;
             cerr << "INFO! TOGGLING SHADOW MAP " << enableShadow << endl;
             m_volumeObject->getShaderProgram()->setUniformi("uEnableShadow", enableShadow);
         }
 
-        else if (a_key == GLFW_KEY_PAGE_UP){
-            if(m_stereoCamera){
+        else if (a_key == GLFW_KEY_PAGE_UP)
+        {
+            if (m_stereoCamera)
+            {
                 m_stereoCamera->getInternalCamera()->m_stereoOffsetW += 0.05;
-                cerr << "INFO! SETTING STEREO OFFSET W " <<
-                        m_stereoCamera->getInternalCamera()->m_stereoOffsetW << endl;
+                cerr << "INFO! SETTING STEREO OFFSET W " << m_stereoCamera->getInternalCamera()->m_stereoOffsetW << endl;
             }
         }
 
-        else if (a_key == GLFW_KEY_PAGE_DOWN){
-            if(m_stereoCamera){
+        else if (a_key == GLFW_KEY_PAGE_DOWN)
+        {
+            if (m_stereoCamera)
+            {
                 m_stereoCamera->getInternalCamera()->m_stereoOffsetW -= 0.05;
-                cerr << "INFO! SETTING STEREO OFFSET W " <<
-                        m_stereoCamera->getInternalCamera()->m_stereoOffsetW << endl;
+                cerr << "INFO! SETTING STEREO OFFSET W " << m_stereoCamera->getInternalCamera()->m_stereoOffsetW << endl;
             }
         }
 
-        else if (a_key == GLFW_KEY_T){
+        else if (a_key == GLFW_KEY_T)
+        {
             int val = m_drillManager.m_activeDrill->getVoxelRemovalThreshold() + 1;
             m_drillManager.m_activeDrill->setVoxelRemvalThreshold(val);
             cerr << "INFO! REMOVAL THRESHOLD " << val << endl;
         }
 
-        // Reset the drill pose b                                             
-        if (a_key == GLFW_KEY_R){
+        // Reset the drill pose b
+        if (a_key == GLFW_KEY_R)
+        {
             cerr << "INFO! RESETTING THE DRILL" << endl;
             m_drillManager.reset();
         }
     }
-    else if(a_mods == GLFW_MOD_ALT){
+    else if (a_mods == GLFW_MOD_ALT)
+    {
         // Toggle Volume Smoothing
-        if (a_key == GLFW_KEY_S){
+        if (a_key == GLFW_KEY_S)
+        {
             m_enableVolumeSmoothing = !m_enableVolumeSmoothing;
             cerr << "INFO! ENABLE VOLUME SMOOTHING: " << m_enableVolumeSmoothing << endl;
             m_volumeObject->getShaderProgram()->setUniformi("uSmoothVolume", m_enableVolumeSmoothing);
             m_volumeObject->getShaderProgram()->setUniformi("uSmoothingLevel", m_volumeSmoothingLevel);
-
         }
-        else if(a_key == GLFW_KEY_UP){
-            m_volumeSmoothingLevel = cClamp(m_volumeSmoothingLevel+1, 1, 10);
+        else if (a_key == GLFW_KEY_UP)
+        {
+            m_volumeSmoothingLevel = cClamp(m_volumeSmoothingLevel + 1, 1, 10);
             cerr << "INFO! SETTING SMOOTHING LEVEL " << m_volumeSmoothingLevel << endl;
             m_volumeObject->getShaderProgram()->setUniformi("uSmoothingLevel", m_volumeSmoothingLevel);
         }
-        else if(a_key == GLFW_KEY_DOWN){
-            m_volumeSmoothingLevel = cClamp(m_volumeSmoothingLevel-1, 1, 10);
+        else if (a_key == GLFW_KEY_DOWN)
+        {
+            m_volumeSmoothingLevel = cClamp(m_volumeSmoothingLevel - 1, 1, 10);
             cerr << "INFO! SETTING SMOOTHING LEVEL " << m_volumeSmoothingLevel << endl;
             m_volumeObject->getShaderProgram()->setUniformi("uSmoothingLevel", m_volumeSmoothingLevel);
         }
 
-        else if (a_key == GLFW_KEY_T){
+        else if (a_key == GLFW_KEY_T)
+        {
             int val = cMax(1, m_drillManager.m_activeDrill->getVoxelRemovalThreshold() - 1);
             m_drillManager.m_activeDrill->setVoxelRemvalThreshold(val);
             cerr << "INFO! REMOVAL THRESHOLD " << val << endl;
@@ -920,60 +941,71 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         std::string text = "[ALT+S] Volume Smoothing: " + std::string(m_enableVolumeSmoothing ? "ENABLED" : "DISABLED");
         cColorf color;
         color.setRed();
-        if (m_enableVolumeSmoothing){
+        if (m_enableVolumeSmoothing)
+        {
             text += " ( LEVEL: " + to_string(m_volumeSmoothingLevel) + ")";
             color.setGreen();
         }
         m_panelManager.setText(m_volumeSmoothingLabel, text);
         m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
     }
-    else{
+    else
+    {
 
         // option - reduce size along X axis
-        if (a_key == GLFW_KEY_4) {
+        if (a_key == GLFW_KEY_4)
+        {
             sliceVolume(0, -0.005);
         }
 
         // option - increase size along X axis
-        else if (a_key == GLFW_KEY_5) {
+        else if (a_key == GLFW_KEY_5)
+        {
             sliceVolume(0, 0.005);
         }
 
         // option - reduce size along Y axis
-        else if (a_key == GLFW_KEY_6) {
+        else if (a_key == GLFW_KEY_6)
+        {
             sliceVolume(1, -0.005);
         }
 
         // option - increase size along Y axis
-        else if (a_key == GLFW_KEY_7) {
+        else if (a_key == GLFW_KEY_7)
+        {
             sliceVolume(1, 0.005);
         }
 
         // option - reduce size along Z axis
-        else if (a_key == GLFW_KEY_8) {
+        else if (a_key == GLFW_KEY_8)
+        {
             sliceVolume(2, -0.005);
         }
 
         // option - increase size along Z axis
-        else if (a_key == GLFW_KEY_9) {
+        else if (a_key == GLFW_KEY_9)
+        {
             sliceVolume(2, 0.005);
         }
         // option - decrease quality of graphic rendering
-        else if (a_key == GLFW_KEY_L) {
+        else if (a_key == GLFW_KEY_L)
+        {
             double value = m_voxelObj->getQuality();
             m_voxelObj->setQuality(value - 0.01);
             cout << "> Quality set to " << cStr(m_voxelObj->getQuality(), 1) << "                            \r";
         }
 
         // option - increase quality of graphic rendering
-        else if (a_key == GLFW_KEY_U) {
+        else if (a_key == GLFW_KEY_U)
+        {
             double value = m_voxelObj->getQuality();
             m_voxelObj->setQuality(value + 0.01);
             cout << "> Quality set to " << cStr(m_voxelObj->getQuality(), 1) << "                            \r";
         }
 
         // option - toggle vertical mirroring
-        else if (a_key == GLFW_KEY_UP) {
+        else if (a_key == GLFW_KEY_UP)
+        {
             double value = m_voxelObj->getOpacityThreshold();
             m_voxelObj->setOpacityThreshold(value + 0.01);
             cout << "> Opacity Threshold set to " << cStr(m_voxelObj->getOpacityThreshold(), 1)
@@ -981,7 +1013,8 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         }
 
         // option - toggle vertical mirroring
-        else if (a_key == GLFW_KEY_DOWN) {
+        else if (a_key == GLFW_KEY_DOWN)
+        {
             double value = m_voxelObj->getOpacityThreshold();
             m_voxelObj->setOpacityThreshold(value - 0.01);
             cout << "> Opacity Threshold set to " << cStr(m_voxelObj->getOpacityThreshold(), 1)
@@ -989,7 +1022,8 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         }
 
         // option - toggle vertical mirroring
-        else if (a_key == GLFW_KEY_RIGHT) {
+        else if (a_key == GLFW_KEY_RIGHT)
+        {
             double value = m_voxelObj->getIsosurfaceValue();
             m_voxelObj->setIsosurfaceValue(value + 0.01);
             cout << "> Isosurface Threshold set to " << cStr(m_voxelObj->getIsosurfaceValue(), 1)
@@ -997,7 +1031,8 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         }
 
         // option - toggle vertical mirroring
-        else if (a_key == GLFW_KEY_LEFT) {
+        else if (a_key == GLFW_KEY_LEFT)
+        {
             double value = m_voxelObj->getIsosurfaceValue();
             m_voxelObj->setIsosurfaceValue(value - 0.01);
             cout << "> Isosurface Threshold set to " << cStr(m_voxelObj->getIsosurfaceValue(), 1)
@@ -1005,12 +1040,15 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         }
 
         // option - toggle vertical mirroring
-        else if (a_key == GLFW_KEY_ENTER) {
+        else if (a_key == GLFW_KEY_ENTER)
+        {
             m_renderingMode++;
-            if (m_renderingMode > 7) {
+            if (m_renderingMode > 7)
+            {
                 m_renderingMode = 0;
             }
-            switch (m_renderingMode) {
+            switch (m_renderingMode)
+            {
             case 0:
                 m_voxelObj->setRenderingModeBasic();
                 std::cerr << "setRenderingModeBasic" << std::endl;
@@ -1046,20 +1084,28 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
             default:
                 break;
             }
-        } else if (a_key == GLFW_KEY_PAGE_UP) {
+        }
+        else if (a_key == GLFW_KEY_PAGE_UP)
+        {
             m_opticalDensity += 0.1;
             m_voxelObj->setOpticalDensity(m_opticalDensity);
             cout << "> Optical Density set to " << cStr(m_opticalDensity, 1) << "                            \n";
-        } else if (a_key == GLFW_KEY_PAGE_DOWN) {
+        }
+        else if (a_key == GLFW_KEY_PAGE_DOWN)
+        {
             m_opticalDensity -= 0.1;
             m_voxelObj->setOpticalDensity(m_opticalDensity);
             cout << "> Optical Density set to " << cStr(m_opticalDensity, 1) << "                            \n";
-        } else if (a_key == GLFW_KEY_HOME) {
+        }
+        else if (a_key == GLFW_KEY_HOME)
+        {
             float val = m_voxelObj->getOpacityThreshold();
             m_voxelObj->setOpacityThreshold(val + 0.1);
             cout << "> Optical Threshold set to " << cStr(m_voxelObj->getOpacityThreshold(), 1)
                  << "                            \n";
-        } else if (a_key == GLFW_KEY_END) {
+        }
+        else if (a_key == GLFW_KEY_END)
+        {
             float val = m_voxelObj->getOpacityThreshold();
             m_voxelObj->setOpacityThreshold(val - 0.1);
             cout << "> Optical Threshold set to " << cStr(m_voxelObj->getOpacityThreshold(), 1)
@@ -1067,98 +1113,111 @@ void afVolmetricDrillingPlugin::keyboardUpdate(GLFWwindow *a_window, int a_key, 
         }
 
         // controls rotational motion of tool
-        else if(a_key == GLFW_KEY_KP_5) {
+        else if (a_key == GLFW_KEY_KP_5)
+        {
 
-            cVector3d rotDir(0, 1, 0) ;
+            cVector3d rotDir(0, 1, 0);
             m_drillManager.incrementDeviceRot(rotDir);
         }
 
-        else if(a_key == GLFW_KEY_KP_8) {
+        else if (a_key == GLFW_KEY_KP_8)
+        {
 
             cVector3d rotDir(0, -1, 0);
             m_drillManager.incrementDeviceRot(rotDir);
         }
 
-        else if(a_key == GLFW_KEY_KP_4) {
+        else if (a_key == GLFW_KEY_KP_4)
+        {
 
             cVector3d rotDir(0, 0, -1);
             m_drillManager.incrementDeviceRot(rotDir);
         }
 
-        else if(a_key == GLFW_KEY_KP_6) {
+        else if (a_key == GLFW_KEY_KP_6)
+        {
 
             cVector3d rotDir(0, 0, 1);
             m_drillManager.incrementDeviceRot(rotDir);
         }
 
         // toggles the functionality of sudden jumping of drill mesh towards the followSphere
-        else if(a_key == GLFW_KEY_X){
+        else if (a_key == GLFW_KEY_X)
+        {
 
             m_drillManager.m_suddenJump = !m_drillManager.m_suddenJump;
         }
 
         // toggles the visibility of drill mesh in the scene
-        else if (a_key == GLFW_KEY_K){
+        else if (a_key == GLFW_KEY_K)
+        {
             m_drillManager.m_show = !m_drillManager.m_show;
             m_drillManager.m_activeDrill->m_rigidBody->m_visualMesh->setShowEnabled(m_drillManager.m_show);
             // m_drillManager.m_burrMesh->setShowEnabled(m_drillManager.m_show);
-
         }
 
-        else if (a_key == GLFW_KEY_B){
-            if (m_footpedal.isAvailable()){
+        else if (a_key == GLFW_KEY_B)
+        {
+            if (m_footpedal.isAvailable())
+            {
                 m_drillManager.m_isOn = !footpedal_pressed;
                 footpedal_pressed = !footpedal_pressed;
             }
-
         }
 
-
         // toggles size of drill burr/tip tool cursor
-        else if (a_key == GLFW_KEY_C){
+        else if (a_key == GLFW_KEY_C)
+        {
             m_drillManager.cycleDrillTypes();
         }
 
-        else if (a_key == GLFW_KEY_KP_ADD){
-            if (m_cameraL){
+        else if (a_key == GLFW_KEY_KP_ADD)
+        {
+            if (m_cameraL)
+            {
                 m_cameraL->setLocalPos(m_cameraL->getLocalPos() - cVector3d(0., 0.001, 0.));
             }
-            if (m_cameraR){
+            if (m_cameraR)
+            {
                 m_cameraR->setLocalPos(m_cameraR->getLocalPos() + cVector3d(0., 0.001, 0.));
             }
 
-            if (m_stereoCamera){
+            if (m_stereoCamera)
+            {
                 double stereo_sep = m_stereoCamera->getInternalCamera()->getStereoEyeSeparation();
                 m_stereoCamera->getInternalCamera()->setStereoEyeSeparation(stereo_sep + 0.002);
             }
         }
-        else if (a_key == GLFW_KEY_KP_SUBTRACT){
-            if (m_cameraL){
+        else if (a_key == GLFW_KEY_KP_SUBTRACT)
+        {
+            if (m_cameraL)
+            {
                 m_cameraL->setLocalPos(m_cameraL->getLocalPos() + cVector3d(0., 0.001, 0.));
             }
-            if (m_cameraR){
+            if (m_cameraR)
+            {
                 m_cameraR->setLocalPos(m_cameraR->getLocalPos() - cVector3d(0., 0.001, 0.));
             }
 
-            if (m_stereoCamera){
+            if (m_stereoCamera)
+            {
                 double stereo_sep = m_stereoCamera->getInternalCamera()->getStereoEyeSeparation();
                 m_stereoCamera->getInternalCamera()->setStereoEyeSeparation(stereo_sep - 0.002);
             }
         }
     }
-
 }
 
-
-void afVolmetricDrillingPlugin::mouseBtnsUpdate(GLFWwindow *a_window, int a_button, int a_action, int a_modes){
-
+void afVolmetricDrillingPlugin::mouseBtnsUpdate(GLFWwindow *a_window, int a_button, int a_action, int a_modes)
+{
 }
 
-void afVolmetricDrillingPlugin::mouseScrollUpdate(GLFWwindow *a_window, double x_pos, double y_pos){
-
+void afVolmetricDrillingPlugin::mouseScrollUpdate(GLFWwindow *a_window, double x_pos, double y_pos)
+{
 }
 
-void afVolmetricDrillingPlugin::reset(){
+void afVolmetricDrillingPlugin::reset()
+{
     cerr << "INFO! PLUGIN RESET CALLED" << endl;
     m_drillManager.reset();
 }
