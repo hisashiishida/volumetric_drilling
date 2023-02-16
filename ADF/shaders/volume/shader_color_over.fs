@@ -255,7 +255,7 @@ void main(void)
             float thres_red = 1.0 * uUnit[1];   // < thres_red is colored red
             float thres_green = 2.0 * uUnit[1]; // > thres_green is colored green
 
-            float dis = 0.05;
+            float dis = 0.04;
 
             vec3 color_sdf;
             // For section 1 & 3

@@ -27,7 +27,7 @@ Please try the following command again.
 
 ```bash
 chmod a+rwx /dev/fw*
-
+```
 
 ## Head Mount Display
 We are using VIVE PRO 2 for this project. 

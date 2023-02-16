@@ -39,7 +39,7 @@ make
 
 
 
-### 1.3 Install clone the drilling repo and build
+### 1.3 Clone the drilling repo and build
 
 ```bash
 cd <volumetric_plugin_path>
@@ -70,7 +70,7 @@ pip install -r requirements.txt
 ```
 
 
-### 2.1 Create sliced from the seg.nrrd file
+### 2.1 Create sliced images from the seg.nrrd file
 We assume that there is a seg.nrrd file, if not please generate it using 3D slicer (https://www.slicer.org/).
 In this readme we assume that seg.nrrd files is in `~/Downloads/spine_segmentations` folder, which contains seg.nrrd files (ex. `SegmentationP0.seg.nrrd` , `SegmentationP7.seg.nrrd`.)
 
@@ -119,7 +119,10 @@ sudo prime-select nvidia
 ```
 
 
+## Actual command used (may need to change the path)
 
+<!-- 
+```bash
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP0_separate.seg.nrrd -p ../resources/volumes/spine_P0_256/plane0
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP1_separate.seg.nrrd -p ../resources/volumes/spine_P1_256/plane0
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segments_1205/SegmentationP2_separate.seg.nrrd -p ../resources/volumes/spine_P2_256/plane0
@@ -168,6 +171,8 @@ python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmen
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L2_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P7_L2_nocolor_256/plane0
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L3_color_test.seg.nrrd -p ../resources/volumes/spine_P7_L3_color_256/plane0
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/test_segments/P7_test_segments/segmentP7_L3_nocolor_test.seg.nrrd -p ../resources/volumes/spine_P7_L3_nocolor_256/plane0
+```
+ -->
 
 
 
