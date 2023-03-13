@@ -77,6 +77,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
             ("bone", p_opt::value<string>()->default_value("L1_minus_drilling"), "Bone edt (ex. L1_minus_drilling)")
             ("sdf", p_opt::value<string>()->default_value("Vertebral_foramen_256"), "sdf_texture sturcture name and resolution")
             ("unit", p_opt::value<double>()->default_value(0.0), "mm to simulation unit")
+            ("location", p_opt::value<string>()->default_value("L"), "Location in the spine ex.) L1, L2")
             ("spacial_resolution", p_opt::value<double>()->default_value(0.48), "mm to simulation unit");
 
 
@@ -102,8 +103,9 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     
     cond = var_map["condition"].as<int>();
     double unit = var_map["unit"].as<double>();
-    space_res = var_map["spacial_resolution"].as<double>();
+    string loc = var_map["location"].as<string>();
     cout << "Active condition: " << cond << endl;
+    cout << "Location: " << loc << endl;
     edt_root = edt_root + "/";
 
     m_zeroColor = cColorb(0x00, 0x00, 0x00, 0x00);
@@ -159,6 +161,11 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
         m_textureCoordScale(1) = (m_maxTexCoord.y() - m_minTexCoord.y()) / (m_maxVolCorner.y() - m_minVolCorner.y());
         m_textureCoordScale(2) = (m_maxTexCoord.z() - m_minTexCoord.z()) / (m_maxVolCorner.z() - m_minVolCorner.z());
     }
+
+    // Set the volume according to the Location
+    if (loc == "L1") m_volumeObject->setLocalPos(-3.35, 0.0, -0.2);
+    if (loc == "L2") m_volumeObject->setLocalPos(-3.35, 0.0,  0.0);
+    if (loc == "L3") m_volumeObject->setLocalPos(-3.35, 0.0,  0.2);
 
     // read the scale factor between the physical workspace of the haptic
     // device and the virtual workspace defined for the tool

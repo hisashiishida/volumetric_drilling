@@ -17,6 +17,7 @@ class Ui(QtWidgets.QWidget):
                                           self.gui_params.pupil_executable_path,
                                           self.gui_params.recording_script_path)
         self.active_volume_adf = ''
+        self.active_location = 'L'
 
         # Setup the grid layout for different volumes
         self.volumes_grid = self.findChild(QtWidgets.QGridLayout, 'gridLayout')
@@ -128,7 +129,7 @@ class Ui(QtWidgets.QWidget):
 
         args = ['--launch_file', str(self.gui_params.launch_file), '-l', launch_file_adf_indices, 
         '-a', self.active_volume_adf, '--edt', self.active_sdf_path, '--bone', self.active_bone_segment, 
-        '--condition', str(self.conditon), "--unit", str(self.unit), "--spacial_resolution", str(self.spacial_resolution)]
+        '--condition', str(self.conditon), "--unit", str(self.unit), "--spacial_resolution", str(self.spacial_resolution), "--location", self.active_location]
 
         if self._ambf_process.state() != QProcess.Running:
             self._ambf_process.start(str(self.gui_params.ambf_executable_path), args)
@@ -162,14 +163,14 @@ class Ui(QtWidgets.QWidget):
         button = self.sender()
         self.print_info('Active Condition is ' + button.text())
         if (button.text() == "No Assistance"):
-            self.active_volume_adf = self.active_volume_adf + '.yaml'
+            self.active_volume_adf = self.active_volume_adf + '_nocolor.yaml'
 
         elif (button.text() == "Warning only"):
-            self.active_volume_adf = self.active_volume_adf + '.yaml'
+            self.active_volume_adf = self.active_volume_adf + '_nocolor.yaml'
             self.conditon = 1
 
         elif (button.text() == "CoNav"):
-            self.active_volume_adf = self.active_volume_adf + '_vis.yaml'
+            self.active_volume_adf = self.active_volume_adf + "_" + self.active_location + '_color.yaml'
             self.conditon = 2
 
 
@@ -178,16 +179,19 @@ class Ui(QtWidgets.QWidget):
         button = self.sender()
         self.print_info('Active Location is ' + button.text())
         if button.text() == "L1":
-            self.active_volume_adf = self.active_volume_adf + "_0"
+            # self.active_volume_adf = self.active_volume_adf + "_0"
+            self.active_location = "L1"
             self.active_bone_segment = 'L1_minus_drilling'
             
 
         elif button.text() == "L2":
-            self.active_volume_adf = self.active_volume_adf + "_1"
+            # self.active_volume_adf = self.active_volume_adf + "_1"
+            self.active_location = "L2"
             self.active_bone_segment = 'L2_minus_drilling'
 
         elif button.text() == "L3":
-            self.active_volume_adf = self.active_volume_adf + "_2"
+            # self.active_volume_adf = self.active_volume_adf + "_2"
+            self.active_location = "L3"
             self.active_bone_segment = 'L3_minus_drilling'
 
 
