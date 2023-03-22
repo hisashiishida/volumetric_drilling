@@ -243,6 +243,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     this->edt_list.print_info();
     this->edt_list.load_all_grids(edt_root);
 
+    bone_edt_name = loc + "_minus_drilling" ;
     EdtContainer cont(bone_edt_name + ".edt", bone_edt_name, vector<int>{255, 255, 255}, 1.0, 1.0);
 
     this->bone_edt_cont = cont;

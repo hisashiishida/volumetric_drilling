@@ -181,18 +181,18 @@ class Ui(QtWidgets.QWidget):
         if button.text() == "L1":
             # self.active_volume_adf = self.active_volume_adf + "_0"
             self.active_location = "L1"
-            self.active_bone_segment = 'L1_minus_drilling'
+            self.active_bone_segment = 'L12_minus_drilling'
             
 
         elif button.text() == "L2":
             # self.active_volume_adf = self.active_volume_adf + "_1"
             self.active_location = "L2"
-            self.active_bone_segment = 'L2_minus_drilling'
+            self.active_bone_segment = 'L23_minus_drilling'
 
         elif button.text() == "L3":
             # self.active_volume_adf = self.active_volume_adf + "_2"
             self.active_location = "L3"
-            self.active_bone_segment = 'L3_minus_drilling'
+            self.active_bone_segment = 'L34_minus_drilling'
 
 
 
