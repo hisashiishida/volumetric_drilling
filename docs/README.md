@@ -108,6 +108,20 @@ cd <volumetric_plugin_path>/build
 ./EdtImageGeneration <path to edt file> <output path>
 ```
 
+### 2.4 Combining the two SDF-images to one
+Run python script "combine_edt_images.py" in the script folder.
+The input_dir argument is the path to the folder that has SDF images from 2.3.
+For example, <input_dir sdf_images path> = "../../resources/edt_grids/spine_P0_256/L1_minus_drilling_256", 
+
+<input_dir sdf_images path2> = "../../resources/edt_grids/spine_P0_256/L2_minus_drilling_256",
+
+<output_dir> = "../../resources/edt_grids/spine_P0_256/L12_minus_drilling_256/"
+
+```
+python3 combine_edt_images.py --input_dir <input_dir sdf_images path>  --input_dir <input_dir sdf_images path2> --output_dir <output_dir>
+```
+
+
 ### Trouble shooting
 If the simulation runs low (~8hz), GPU must be disabled. Please try the following command and make sure ambf process is visble in `nvidia-smi`.
 
