@@ -101,14 +101,11 @@ python3 scripts/EdtGeneration/create_all_edt_spine.py --input spine_P0_256 --out
 if the color id is wrong, there gonna be error message during the runtime.
 
 ### 2.3 Create SDF-images
-Run `EdtImageGeneration` and select the folder name (ex. spine_P0) and structure name (ex. L1_minus drilling), and resolution (ex. 256).
-
-folder name: spine_P0, spine_P1, spine_P2, spine_P4, spine_P7
-structure name: L1_minus_drilling, L2_minus_drilling, L3_minus_drilling, Vertebral_foramen
+Run `EdtImageGeneration` with the path to the edt file and the output folder.
 
 ```bash 
 cd <volumetric_plugin_path>/build
-./EdtImageGeneration
+./EdtImageGeneration <path to edt file> <output path>
 ```
 
 ### Trouble shooting
