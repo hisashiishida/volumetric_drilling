@@ -219,8 +219,8 @@ void main(void)
 
             vec3 sdf_t = tcr;
             // float sdf_distance = texture3D(sdfVolume, tcr).r - texture3D(sdfVolume, tcr).b;
-            float sdf_distance = texture3D(sdfVolume, sdf_t).r - texture3D(sdfVolume, sdf_t).b;
-            float sdf_distance1 = texture3D(sdfVolume1, sdf_t).r - texture3D(sdfVolume1, sdf_t).b;
+            float sdf_distance = (texture3D(sdfVolume, sdf_t).r - texture3D(sdfVolume, sdf_t).b) * 600.0 * uUnit[1];
+            float sdf_distance1 = (texture3D(sdfVolume1, sdf_t).r - texture3D(sdfVolume1, sdf_t).b)* 600.0 * uUnit[1];
 
 
             ///////////////////////////
@@ -248,12 +248,9 @@ void main(void)
             vec3 L1_2  = uL_2;
             vec3 L1_46 = uL_46;
             vec3 L1_5  = uL_5;
-
             
-
-            
-            float thres_red = 1.0 * uUnit[1];   // < thres_red is colored red
-            float thres_green = 2.0 * uUnit[1]; // > thres_green is colored green
+            float thres_red = 2.0 * uUnit[1];   // < thres_red is colored red
+            float thres_green = 4.0 * uUnit[1]; // > thres_green is colored green
 
             float dis = 0.04;
 

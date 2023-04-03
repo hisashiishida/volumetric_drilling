@@ -104,6 +104,7 @@ int afVolmetricDrillingPlugin::init(int argc, char **argv, const afWorldPtr a_af
     cond = var_map["condition"].as<int>();
     double unit = var_map["unit"].as<double>();
     string loc = var_map["location"].as<string>();
+    space_res = var_map["spacial_resolution"].as<double>();
     cout << "Active condition: " << cond << endl;
     cout << "Location: " << loc << endl;
     edt_root = edt_root + "/";
@@ -346,8 +347,56 @@ void afVolmetricDrillingPlugin::graphicsUpdate(){
     m_volumeObject->getShaderProgram()->setUniform("uL_5", L1_5);
 
     cVector3d uUnit;
-    uUnit.set(m_drillManager.m_units_mmToSim, m_drillManager.m_units_mmToSim, m_drillManager.m_units_mmToSim);
+    uUnit.set(m_drillManager.m_units_mmToSim, space_res, 0.0);
     m_volumeObject->getShaderProgram()->setUniform("uUnit", uUnit);
+
+    if (cond == 1){
+            warn_red = "Delicate anatomy breached!!";
+            warn_yellow = "[Caution] 1mm to delicate anatomy";
+    }
+           
+    else if (cond==2){
+        warn_red = "Red region breached!!";
+        warn_yellow = "[Caution] Yellow region breached";
+    }
+
+    if (m_alpha_min == 0.1 || m_alpha_min == 0.2){
+        m_panelManager.setText(m_warningLabel,  warn_red);
+        m_panelManager.setVisible(m_warningLabel, true);
+        m_panelManager.setText(m_warningLabel_right,  warn_red);
+        m_panelManager.setVisible(m_warningLabel_right, true);
+        m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
+        m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
+
+        if(m_beepAudioSource && cond == 1){
+            m_beepAudioSource->play();
+            m_beepAudioSource->setPitch(1.5);
+        }
+    }
+
+    else if (m_alpha_min == 0.3){
+        m_panelManager.setVisible(m_warningLabel, true);
+        m_panelManager.setText(m_warningLabel, warn_yellow);
+        m_panelManager.setText(m_warningLabel_right, warn_yellow);
+        m_panelManager.setVisible(m_warningLabel_right, true);
+        m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0.6, 0., 1.0));
+        m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0.6, 0., 1.0));
+        if(m_beepAudioSource && cond == 1){
+            m_beepAudioSource->play();
+            m_beepAudioSource->setPitch(1.0);
+        }
+    }
+    
+    else{
+        if(m_beepAudioSource && cond == 1){
+            m_beepAudioSource->setPitch(1.0);
+            m_beepAudioSource->stop();
+        }
+        m_panelManager.setVisible(m_warningLabel, false);
+        m_panelManager.setVisible(m_warningLabel_right, false);
+    }
+
+
 
     static double last_time = 0.0;
 
@@ -380,11 +429,33 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                 int removalCount = cMin(m_drillManager.m_activeDrill->getVoxelRemovalThreshold(), (int)contact->m_events.size());
                 m_drillManager.m_drillingPub->clearVoxelMsg();
                 m_mutexVoxel.acquire();
+                m_alpha_min = 1.0;
                 for (int cIdx = 0 ; cIdx < removalCount ; cIdx++){
                     cVector3d ct(contact->m_events[cIdx].m_voxelIndexX, contact->m_events[cIdx].m_voxelIndexY, contact->m_events[cIdx].m_voxelIndexZ);
                     cColorb colorb;
                     m_voxelObj->m_texture->m_image->getVoxelColor(uint(ct.x()), uint(ct.y()), uint(ct.z()), colorb);
                     cColorf colorf = colorb.getColorf();
+
+                    if ((*(edt_list.list[0].edt_grid))(ct.x(), ct.y(), ct.z()) * space_res < 0.1 || (*(bone_edt_cont.edt_grid))(ct.x(), ct.y(), ct.z()) < 0.1)
+                    {
+                        m_alpha = 0.1;
+                    }
+
+                    else if ((*(edt_list.list[0].edt_grid))(ct.x(), ct.y(), ct.z()) * space_res < red_thres || (*(bone_edt_cont.edt_grid))(ct.x(), ct.y(), ct.z()) < red_thres)
+                    {
+                        m_alpha = 0.2;
+                        // cout << "Drilling Red region" << endl;
+                    }
+                    else if ((*(edt_list.list[0].edt_grid))(ct.x(), ct.y(), ct.z()) * space_res < yellow_thres || (*(bone_edt_cont.edt_grid))(ct.x(), ct.y(), ct.z()) < yellow_thres)
+                    {
+                        m_alpha = 0.3;
+                        // cout << "Drilling Yellow region" << endl;
+                    }
+                    else{
+                        m_alpha = 1.0;
+                    }
+                    if (m_alpha_min > m_alpha) m_alpha_min = m_alpha;
+
                     colorf.setA(m_alpha);
                     m_drillManager.m_drillingPub->appendToVoxelMsg(ct, colorf);
                     m_voxelObj->m_texture->m_image->setVoxelColor(uint(ct.x()), uint(ct.y()), uint(ct.z()), m_zeroColor);
@@ -402,6 +473,7 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
             //     m_panelManager.setVisible(m_warningLabel, true);
             // }
         }
+        else m_alpha = 1.0;
 
         // mark voxel for update
 
@@ -441,7 +513,6 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
             edt_list.list[i].m_dist_object = (*(edt_list.list[i].edt_grid))(index_x, index_y, index_z);
             if (min_distance > edt_list.list[i].m_dist_object)
             {
-
                 min_distance = edt_list.list[i].m_dist_object;
                 min_name = edt_list.list[i].name;
                 min_index = i;
@@ -450,11 +521,14 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                 min_color[2] = edt_list.list[i].rgb[2];
             }
         }
-        min_distance = min_distance * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim;
+        cout << space_res << endl;
+        cout << "m_dist_object:" << edt_list.list[0].m_dist_object << endl;
+        min_distance = double(edt_list.list[0].m_dist_object)* space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim;
+        // min_distance = min_distance * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim;
         m_panelManager.setText(m_distanceLabel, cStr(min_distance) + " mm");
-        m_panelManager.setVisible(m_distanceLabel, false);
+        m_panelManager.setVisible(m_distanceLabel, true);
         m_panelManager.setText(m_distanceLabel_right, cStr(min_distance) + " mm");
-        m_panelManager.setVisible(m_distanceLabel_right, false);
+        m_panelManager.setVisible(m_distanceLabel_right, true);
 
 
         // m_panelManager.setFontColor(m_volumeSmoothingLabel, color);
@@ -477,61 +551,67 @@ void afVolmetricDrillingPlugin::physicsUpdate(double dt){
                 warn_yellow = "[Caution] Yellow region breached";
             }
 
-            if(m_storedColor != m_boneColor && m_storedColor != m_zeroColor)
-            {   
-                // cout << (m_storedColor == m_L1_13_Color) << ": " <<(m_storedColor == m_L1_2_Color) << ": " <<(m_storedColor == m_L1_46_Color) << ": " <<(m_storedColor == m_L1_5_Color) << endl;
-                // cout << "Stored color:" << endl;
-                // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": " 
-                //<<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
-                
-                if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 0.1 &&
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 0.1)
-                {
-                    m_alpha = 0.1;
-                }
+            // if( m_storedColor != m_zeroColor)
+            // {   
+            //     // cout << (m_storedColor == m_L1_13_Color) << ": " <<(m_storedColor == m_L1_2_Color) << ": " <<(m_storedColor == m_L1_46_Color) << ": " <<(m_storedColor == m_L1_5_Color) << endl;
+            //     // cout << "Stored color:" << endl;
+            //     // cout << reinterpret_cast<const string*>(m_storedColor.getR()) << ": " <<  reinterpret_cast<const string*>(m_storedColor.getG())  << ": " 
+            //     // <<reinterpret_cast<const string*>(m_storedColor.getB()) << ": " <<reinterpret_cast<const string*>(m_storedColor.getA()) <<endl;
+            //     // cout << "VF distance:" << (*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size  << endl;
+            //     // cout << "Bone distance:" << (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size << endl;
+            //     if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 0.1 &&
+            //     (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < 0.1)
+            //     {
+            //         m_alpha = 0.1;
+            //         // cout << "Drilling Green region" << endl;
+            //     }
 
-                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < red_thres &&
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < red_thres)
-                {
-                    m_panelManager.setText(m_warningLabel,  warn_red);
-                    m_panelManager.setVisible(m_warningLabel, true);
-                    m_panelManager.setText(m_warningLabel_right,  warn_red);
-                    m_panelManager.setVisible(m_warningLabel_right, true);
-                    m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
-                    m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
+            //     else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < red_thres ||
+            //     (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z)* space_res -  0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < red_thres)
+            //     {
+            //         m_panelManager.setText(m_warningLabel,  warn_red);
+            //         m_panelManager.setVisible(m_warningLabel, true);
+            //         m_panelManager.setText(m_warningLabel_right,  warn_red);
+            //         m_panelManager.setVisible(m_warningLabel_right, true);
+            //         m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0., 0., 1.0));
+            //         m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0., 0., 1.0));
 
-                    if(m_beepAudioSource && cond == 1){
-                        m_beepAudioSource->play();
-                        m_beepAudioSource->setPitch(1.5);
-                    }
-                    m_alpha = 0.2;
+            //         if(m_beepAudioSource && cond == 1){
+            //             m_beepAudioSource->play();
+            //             m_beepAudioSource->setPitch(1.5);
+            //         }
+            //         m_alpha = 0.2;
+            //         // cout << "Drilling Red region" << endl;
+
                     
-                }
-                else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < yellow_thres ||
-                (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res -  m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < yellow_thres)
-                {
-                    m_panelManager.setVisible(m_warningLabel, true);
-                    m_panelManager.setText(m_warningLabel, warn_yellow);
-                    m_panelManager.setText(m_warningLabel_right, warn_yellow);
-                    m_panelManager.setVisible(m_warningLabel_right, true);
-                    m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0.6, 0., 1.0));
-                    m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0.6, 0., 1.0));
-                    if(m_beepAudioSource && cond == 1){
-                        m_beepAudioSource->play();
-                        m_beepAudioSource->setPitch(1.0);
-                    }
-                    m_alpha = 0.3;
-                }
-                else{
-                    if(m_beepAudioSource && cond == 1){
-                        m_beepAudioSource->setPitch(1.0);
-                        m_beepAudioSource->stop();
-                    }
-                    m_alpha = 0.0;
-                    m_panelManager.setVisible(m_warningLabel, false);
-                    m_panelManager.setVisible(m_warningLabel_right, false);
-                }
-            }
+            //     }
+            //     else if ((*(edt_list.list[0].edt_grid))(index_x, index_y, index_z) * space_res - 0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < yellow_thres ||
+            //     (*(bone_edt_cont.edt_grid))(index_x, index_y, index_z) * space_res -  0.5 * m_drillManager.m_activeDrill->m_size / m_drillManager.m_units_mmToSim < yellow_thres)
+            //     {
+            //         m_panelManager.setVisible(m_warningLabel, true);
+            //         m_panelManager.setText(m_warningLabel, warn_yellow);
+            //         m_panelManager.setText(m_warningLabel_right, warn_yellow);
+            //         m_panelManager.setVisible(m_warningLabel_right, true);
+            //         m_panelManager.setPanelColor(m_warningLabel, cColorf(0.6, 0.6, 0., 1.0));
+            //         m_panelManager.setPanelColor(m_warningLabel_right, cColorf(0.6, 0.6, 0., 1.0));
+            //         if(m_beepAudioSource && cond == 1){
+            //             m_beepAudioSource->play();
+            //             m_beepAudioSource->setPitch(1.0);
+            //         }
+            //         m_alpha = 0.3;
+            //         // cout << "Drilling Yellow region" << endl;
+
+            //     }
+            //     else{
+            //         if(m_beepAudioSource && cond == 1){
+            //             m_beepAudioSource->setPitch(1.0);
+            //             m_beepAudioSource->stop();
+            //         }
+            //         m_alpha = 0.0;
+            //         m_panelManager.setVisible(m_warningLabel, false);
+            //         m_panelManager.setVisible(m_warningLabel_right, false);
+            //     }
+            // }
             // else {
             // m_panelManager.setVisible(m_warningLabel, false);
             // m_panelManager.setVisible(m_warningLabel_right, false);
