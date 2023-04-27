@@ -30,7 +30,12 @@ chmod a+rwx /dev/fw*
 ```
 
 ## Head Mount Display
-We are using VIVE PRO 2 for this project. 
+We are using VIVE PRO for this project. 
+From https://gitlab.freedesktop.org/monado/utilities/xr-hardware, download the config file, "70-xrhardware.rules."
+copy to the directory, "/etc/udev/rules.dev" using the following command.
+```bash
+sudo cp 70-xrhardware.rules /etc/udev/rules.d/
+
 Please refer to the follwing website: https://github.com/OpenHMD/OpenHMD/wiki/Xorg .
 
 [Warning] If you create the 99-HMD.config, the laptop screen will be disabled. Please be careful and be sure to have external monitor.
