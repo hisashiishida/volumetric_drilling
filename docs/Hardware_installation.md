@@ -35,6 +35,15 @@ From https://gitlab.freedesktop.org/monado/utilities/xr-hardware, download the c
 copy to the directory, "/etc/udev/rules.dev" using the following command.
 ```bash
 sudo cp 70-xrhardware.rules /etc/udev/rules.d/
+```
+You should alos check your group by command
+```bash
+id
+```
+You can add you to the group "plugdev" by the follwoing command:
+```bash
+sudo usermod -a -G plugdev <username>
+```
 
 Please refer to the follwing website: https://github.com/OpenHMD/OpenHMD/wiki/Xorg .
 
