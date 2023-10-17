@@ -47,7 +47,7 @@ sudo usermod -a -G plugdev <username>
 
 Please refer to the follwing website: https://github.com/OpenHMD/OpenHMD/wiki/Xorg .
 
-[Warning] If you create the 99-HMD.config, the laptop screen will be disabled. Please be careful and be sure to have external monitor.
+[Warning] If you create the 99-HMD.conf, the laptop screen will be disabled. Please be careful and be sure to have external monitor.
 
 ```bash
 cd /usr/share/X11/xorg.conf.d/
