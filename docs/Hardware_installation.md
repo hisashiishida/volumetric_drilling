@@ -53,3 +53,10 @@ Please refer to the follwing website: https://github.com/OpenHMD/OpenHMD/wiki/Xo
 cd /usr/share/X11/xorg.conf.d/
 sudo mv 99-HMD.conf 99-HMD.conf.bak # rename the file to enable your laptop screen
 ```
+
+### Trouble shooting
+If HMD was flipped use the follwing commmand to fix this issue:
+**<your_output_monitor>** can be **DP-2** and you can flip with respect to any axis.
+```bash
+xrandr --output <your_output_monitor>  --reflect x
+```
