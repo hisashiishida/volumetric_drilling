@@ -82,6 +82,7 @@ In this readme we assume that seg.nrrd files is in `~/Downloads/spine_segmentati
 cd <volumetric_plugin_path>/scripts
 python3 seg_nrrd_to_pngs.py -n ~/Downloads/spine_segmentations/SegmentationP0.seg.nrrd -p ../resources/volumes/spine_P0_256/plane0
 ```
+Alternatively, you can generate the png slices from 3d Slicer directly by following the instruction on "https://github.com/LCSR-CIIS/ambf_util_slicer_plugin"
 
 ### 2.2 Create SDF from the sliced image
 All the commands in this section should be execute from the project root directory.
@@ -107,8 +108,17 @@ Run `EdtImageGeneration` with the path to the edt file and the output folder.
 cd <volumetric_plugin_path>/build
 ./EdtImageGeneration <path to edt file> <output path>
 ```
+Note that the output path is hard-coded in the EdtImageGeneration.cpp
 
-### 2.4 Combining the two SDF-images to one
+### 2.4 Visualize SDF
+
+Run VisualSDF.py at "https://github.com/LCSR-CIIS/SDF_util/blob/main/VisualSDF.py"
+
+example:  
+ python3 VisualSDF.py --ori /home/.../plane000188.png --sdf /home/.../edtplane_188.png --output /home/.../out_188.png
+
+
+### 2.5 Combining the two SDF-images to one
 Run python script "combine_edt_images.py" in the script folder.
 The input_dir argument is the path to the folder that has SDF images from 2.3.
 For example, <input_dir sdf_images path> = "../../resources/edt_grids/spine_P0_256/L1_minus_drilling_256", 
