@@ -99,6 +99,7 @@ private:
     std::shared_ptr<ros::Publisher> m_drillSizePub;
     std::shared_ptr<ros::Publisher> m_volumeInfoPub;
     std::shared_ptr<ros::Publisher> m_forcefeedbackPub;
+    std::shared_ptr<ros::Subscriber> m_removeVoxelsSub;
 
     volumetric_drilling_msgs::Voxels m_voxel_msg;
     volumetric_drilling_msgs::DrillSize m_drill_size_msg;
